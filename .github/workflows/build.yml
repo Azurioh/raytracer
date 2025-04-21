@@ -15,10 +15,15 @@ on:
     branches:
       - main
 
+env:
+  MIRROR_URL: git@github.com:EpitechPromo2028/B-OOP-400-MLH-4-1-raytracer-mael.bertocchi.git
+  BINARY_NAME: raytracer
+
 jobs:
   build:
-    runs-on: ubuntu-latest
     name: Build
+    runs-on: ubuntu-latest
+    if: github.repository != 'EpitechPromo2028/B-OOP-400-MLH-4-1-raytracer-mael.bertocchi.git'
     container:
       image: epitechcontent/epitest-docker:latest
 
@@ -31,7 +36,25 @@ jobs:
         timeout-minutes: 2
 
       - name: Is server executable ?
-        run: if [ ! -x "raytracer" ]; then exit 1; fi
+        run: if [ ! -x ${{ env.BINARY_NAME }} ]; then exit 1; fi
 
       - name: Cleanup
         run: make fclean
+
+  push_to_mirror:
+    name: Push to Mirror
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Mirror
+        uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url: ${{ env.MIRROR_URL }}
+          ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
