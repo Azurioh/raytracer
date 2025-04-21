@@ -1,0 +1,37 @@
+##
+## EPITECH PROJECT, 2025
+## Raytracer
+## File description:
+## build.yml
+##
+
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    container:
+      image: epitechcontent/epitest-docker:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: make
+        timeout-minutes: 2
+
+      - name: Is server executable ?
+        run: if [ ! -x "raytracer" ]; then exit 1; fi
+
+      - name: Cleanup
+        run: make fclean

@@ -27,6 +27,15 @@
 *.lib
 
 # Executables
-*.exe
-*.out
+raytracer
 *.app
+*.out
+*.exe
+
+# Local files
+temporary/
+.vscode/
+.DS_Store
+
+# Doxygen
+docs/
