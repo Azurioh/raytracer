@@ -12,10 +12,9 @@
 
 namespace RayTracer
 {
-    class Ray
-    {
+    class Ray {
         public:
-            Ray();
+            Ray() = default;
             Ray(Math::Point3D& origin, Math::Vector3D& direction);
             ~Ray() = default;
 

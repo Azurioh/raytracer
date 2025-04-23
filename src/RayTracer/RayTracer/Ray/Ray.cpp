@@ -7,14 +7,8 @@
 
 #include "Ray.hh"
 
-RayTracer::Ray::Ray()
+RayTracer::Ray::Ray(Math::Point3D& origin, Math::Vector3D& direction): _origin(origin), _direction(direction)
 {
-}
-
-RayTracer::Ray::Ray(Math::Point3D& origin, Math::Vector3D& direction)
-{
-    _origin = origin;
-    _direction = direction;
 }
 
 Math::Point3D RayTracer::Ray::getOrigin(void) const
