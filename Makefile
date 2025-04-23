@@ -5,24 +5,16 @@
 ## Makefile
 ##
 
-SRC = $(shell find src -type f -name "*.cpp")
-OBJ = $(SRC:.cpp=.o)
+all: raytracer
 
-CXXFLAGS += -std=c++20 -g -Wall -Wextra -Wpedantic -I include -I src
-
-NAME = raytracer
-
-all: $(NAME)
-
-$(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+raytracer:
+	make -C src/RayTracer
+	mv src/RayTracer/raytracer .
 
 clean:
-	find src -type f -name '*.o' -delete
+	make clean -C src/RayTracer
 
-fclean: clean
-	$(RM) $(CLIENT) $(SERVER)
+fclean:
+	make fclean -C src/RayTracer
 
 re: fclean all
-
-.PHONY: all client server clean fclean re

@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2025
-** bs-raytracer
+** Raytracer
 ** File description:
 ** Point3D
 */
