@@ -27,7 +27,7 @@
 *.lib
 
 # Executables
-raytracer
+/raytracer
 *.app
 *.out
 *.exe
@@ -36,6 +36,7 @@ raytracer
 temporary/
 .vscode/
 .DS_Store
+compile_commands.json
 
 # Doxygen
 docs/
