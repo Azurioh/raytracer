@@ -23,7 +23,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: github.repository != 'EpitechPromo2028/B-OOP-400-MLH-4-1-raytracer-mael.bertocchi.git'
+    if: github.repository != 'EpitechPromo2028/B-OOP-400-MLH-4-1-raytracer-mael.bertocchi'
     container:
       image: epitechcontent/epitest-docker:latest
 
