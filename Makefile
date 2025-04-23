@@ -5,16 +5,21 @@
 ## Makefile
 ##
 
+NAME	=	raytracer
+
+.PHONY: all raytracer clean fclean re
+
 all: raytracer
 
 raytracer:
 	make -C src/RayTracer
-	mv src/RayTracer/raytracer .
+	mv src/RayTracer/binary ./raytracer
 
 clean:
 	make clean -C src/RayTracer
 
 fclean:
 	make fclean -C src/RayTracer
+	rm -rf $(NAME)
 
 re: fclean all
