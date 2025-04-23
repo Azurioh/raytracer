@@ -8,7 +8,7 @@
 SRC = $(shell find src -type f -name "*.cpp")
 OBJ = $(SRC:.cpp=.o)
 
-CXXFLAGS += -std=c++20 -g -Wall -Wextra -Wpedantic -Iinclude
+CXXFLAGS += -std=c++20 -g -Wall -Wextra -Wpedantic -I include -I src
 
 NAME = raytracer
 
