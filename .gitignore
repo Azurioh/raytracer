@@ -31,6 +31,7 @@
 *.app
 *.out
 *.exe
+binary
 
 # Local files
 temporary/
