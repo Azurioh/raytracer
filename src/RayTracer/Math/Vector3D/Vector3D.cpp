@@ -15,6 +15,9 @@ Math::Vector3D::Vector3D(double x, double y, double z): _x(x), _y(y), _z(z)
 
 Math::Vector3D::Vector3D(const Point3D &point)
 {
+    _x = point.getX();
+    _y = point.getY();
+    _z = point.getZ();
 }
 
 Math::Vector3D::Vector3D(const Math::Vector3D &vector): _x(vector.getX()), _y(vector.getY()), _z(vector.getZ())
@@ -85,6 +88,7 @@ Math::Vector3D& Math::Vector3D::operator+=(Vector3D const& vector)
     _x += vector.getX();
     _y += vector.getY();
     _z += vector.getZ();
+    return *this;
 }
 
 Math::Vector3D& Math::Vector3D::operator-=(Vector3D const& vector)
@@ -92,6 +96,7 @@ Math::Vector3D& Math::Vector3D::operator-=(Vector3D const& vector)
     _x -= vector.getX();
     _y -= vector.getY();
     _z -= vector.getZ();
+    return *this;
 }
 
 Math::Vector3D& Math::Vector3D::operator=(Vector3D const& vector)
@@ -99,6 +104,7 @@ Math::Vector3D& Math::Vector3D::operator=(Vector3D const& vector)
     _x = vector.getX();
     _y = vector.getY();
     _z = vector.getZ();
+    return *this;
 }
 
 Math::Vector3D Math::Vector3D::operator*(double const scalar) const
@@ -116,6 +122,7 @@ Math::Vector3D& Math::Vector3D::operator*=(double const scalar)
     _x *= scalar;
     _y *= scalar;
     _z *= scalar;
+    return *this;
 }
 
 Math::Vector3D& Math::Vector3D::operator/=(double const scalar)
@@ -123,6 +130,7 @@ Math::Vector3D& Math::Vector3D::operator/=(double const scalar)
     _x /= scalar;
     _y /= scalar;
     _z /= scalar;
+    return *this;
 }
 
 bool Math::Vector3D::operator==(Vector3D const& vector) const
