@@ -59,6 +59,15 @@ Math::Point3D& Math::Point3D::operator+=(const Vector3D& vector)
     _x += vector.getX();
     _y += vector.getY();
     _z += vector.getZ();
+    return *this;
+}
+
+Math::Point3D& Math::Point3D::operator=(const Point3D& point)
+{
+    _x = point.getX();
+    _y = point.getY();
+    _z = point.getZ();
+    return *this;
 }
 
 Math::Vector3D Math::Point3D::operator-(const Point3D& point) const
