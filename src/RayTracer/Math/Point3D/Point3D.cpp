@@ -19,19 +19,34 @@ Math::Point3D::Point3D(const Point3D &point): _x(point.getX()), _y(point.getY())
 {
 }
 
-double Math::Vector3D::getX(void) const
+double Math::Point3D::getX(void) const
 {
 	return _x;
 }
 
-double Math::Vector3D::getY(void) const
+double Math::Point3D::getY(void) const
 {
 	return _y;
 }
 
-double Math::Vector3D::getZ(void) const
+double Math::Point3D::getZ(void) const
 {
 	return _z;
+}
+
+void Math::Point3D::setX(double x)
+{
+    _x = x;
+}
+
+void Math::Point3D::setY(double y)
+{
+    _y = y;
+}
+
+void Math::Point3D::setZ(double z)
+{
+    _z = z;
 }
 
 Math::Point3D Math::Point3D::operator+(const Vector3D& vector) const

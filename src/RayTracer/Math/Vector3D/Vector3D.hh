@@ -21,6 +21,10 @@ namespace Math {
             double getY(void) const;
             double getZ(void) const;
 
+            void setX(double x);
+            void setY(double x);
+            void setZ(double x);
+
             double length(void) const;
             double dot(Vector3D const& vector) const;
 

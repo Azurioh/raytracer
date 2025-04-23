@@ -36,6 +36,21 @@ double Math::Vector3D::getZ(void) const
 	return _z;
 }
 
+void Math::Vector3D::setX(double x)
+{
+    _x = x;
+}
+
+void Math::Vector3D::setY(double y)
+{
+    _y = y;
+}
+
+void Math::Vector3D::setZ(double z)
+{
+    _z = z;
+}
+
 double Math::Vector3D::length(void) const
 {
     return std::sqrt(

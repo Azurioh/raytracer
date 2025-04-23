@@ -22,6 +22,10 @@ namespace Math {
             double getY(void) const;
             double getZ(void) const;
 
+            void setX(double x);
+            void setY(double x);
+            void setZ(double x);
+
             Point3D operator+(const Vector3D& vector) const;
             Point3D& operator+=(const Vector3D& vector);
 
