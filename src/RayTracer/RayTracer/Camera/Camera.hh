@@ -8,8 +8,8 @@
 #pragma once
 
 #include "Math/Point3D/Point3D.hh"
-#include "Ray/Ray.hh"
-#include "Screen/Screen.hh"
+#include "RayTracer/Ray/Ray.hh"
+#include "RayTracer/Screen/Screen.hh"
 
 namespace RayTracer
 {
