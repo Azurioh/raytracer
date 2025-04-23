@@ -65,6 +65,11 @@ double Math::Vector3D::dot(Math::Vector3D const& vector) const
     return (_x * vector.getX()) + (_y * vector.getY()) + (_z * vector.getZ());
 }
 
+void Math::Vector3D::normalize(void)
+{
+    *this /= length();
+}
+
 Math::Vector3D Math::Vector3D::operator+(Vector3D const& vector) const
 {
     return Math::Vector3D(_x + vector.getX(), _y + vector.getY(), _z + vector.getZ());

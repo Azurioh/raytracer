@@ -27,6 +27,7 @@ namespace Math {
 
             double length(void) const;
             double dot(Vector3D const& vector) const;
+            void normalize(void);
 
             Vector3D operator+(Vector3D const& vector) const;
             Vector3D operator-(Vector3D const& vector) const;
