@@ -6,8 +6,12 @@
 */
 
 #include <cstdint>
+#include "RayTracer/Core/Core.hh"
 
 std::int32_t main()
 {
+    Core core;
+
+    core.start();
     return 0;
 }
