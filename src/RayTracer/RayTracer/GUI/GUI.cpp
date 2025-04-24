@@ -97,8 +97,7 @@ void RayTracer::GUI::_refreshRender(void)
                 }
                 if (closest.size() == 0) {
                     closest.push_back({s, t[1]});
-                }
-                if (closest.size() == 0 || t[1] < closest[0].second) {
+                } else if (t[1] < closest[0].second) {
                     closest.clear();
                     closest.push_back({s, t[1]});
                 }
