@@ -11,7 +11,7 @@ OBJ = $(SRC:.cpp=.o)
 ERROR_FLAGS	=	-Werror -Wall -Wextra -Wpedantic
 INCLUDES	=	-I .
 LDLIBS		+=	-lsfml-window -lsfml-system -lsfml-graphics
-CXXFLAGS += $(ERROR_FLAGS) $(INCLUDES) -std=c++20
+CXXFLAGS += $(ERROR_FLAGS) $(INCLUDES) -std=c++20 -g
 
 NAME = binary
 
