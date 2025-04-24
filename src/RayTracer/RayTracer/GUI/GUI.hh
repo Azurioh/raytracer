@@ -16,7 +16,7 @@ namespace RayTracer
 {
     class GUI {
         public:
-            GUI(std::vector<RayTracer::Primitives::Sphere> spheres, RayTracer::Camera& camera, sf::VideoMode windowSize = sf::VideoMode(800, 800),
+            GUI(std::vector<RayTracer::Primitives::Sphere> spheres, RayTracer::Camera& camera, sf::Image& pixelView,
                 std::string windowTitle = "SFML Window");
             ~GUI();
 
@@ -25,7 +25,7 @@ namespace RayTracer
 
         private:
             sf::RenderWindow _window;
-            sf::Image _pixelView;
+            sf::Image& _pixelView;
             std::unique_ptr<sf::Texture> _texture;
             std::unique_ptr<sf::Sprite> _sprite;
             std::vector<RayTracer::Primitives::Sphere> _spheres;

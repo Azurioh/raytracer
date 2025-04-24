@@ -7,10 +7,11 @@
 
 #include "GUI.hh"
 
-RayTracer::GUI::GUI(std::vector<RayTracer::Primitives::Sphere> spheres, RayTracer::Camera &camera, sf::VideoMode windowSize, std::string windowTitle):
-    _window(windowSize, windowTitle), _spheres(spheres), _cam(camera)
+RayTracer::GUI::GUI(std::vector<RayTracer::Primitives::Sphere> spheres, RayTracer::Camera &camera, sf::Image& pixelView, std::string windowTitle):
+    _window(sf::VideoMode(pixelView.getSize().x, pixelView.getSize().y), windowTitle), _pixelView(pixelView),
+    _texture(std::make_unique<sf::Texture>()), _sprite(std::make_unique<sf::Sprite>()), _spheres(spheres), _cam(camera)
 {
-    _pixelView.create(windowSize.width, windowSize.height);
+    _refreshRender();
 }
 
 RayTracer::GUI::~GUI()
@@ -70,9 +71,9 @@ void RayTracer::GUI::_handleEvents(void)
 
 void RayTracer::GUI::_refreshRender(void)
 {
-    double lightIntensity = 1.0;
-    double ambientFactor = 0.0;
-    double diffuseFactor = 0.0;
+    double lightIntensity = 0.9;
+    double ambientFactor = 0.2;
+    double diffuseFactor = 0;
     double light = (ambientFactor + diffuseFactor * (1 - ambientFactor)) * lightIntensity;
     double xAxis = _cam.getScreen().getLeftSide().length();
     double yAxis = _cam.getScreen().getBottomSide().length();
@@ -85,16 +86,21 @@ void RayTracer::GUI::_refreshRender(void)
     for (double y = 0; y < yAxis; y++) {
         for (double x = 0; x < xAxis; x++) {
             double u = x / xAxis;
-            double v = v / yAxis;
+            double v = y / yAxis;
             ray = _cam.ray(u, v);
+            closest.clear();
 
             for (auto s : _spheres) {
                 std::vector<double> t = s.hits(ray);
                 if (t.empty()) {
                     continue;
                 }
+                if (closest.size() == 0) {
+                    closest.push_back({s, t[1]});
+                }
                 if (closest.size() == 0 || t[1] < closest[0].second) {
-                    closest[0] = {s, t[1]};
+                    closest.clear();
+                    closest.push_back({s, t[1]});
                 }
             }
 
@@ -140,4 +146,7 @@ void RayTracer::GUI::_refreshRender(void)
             _pixelView.setPixel(x, y, color);
         }
     }
+    _texture = std::unique_ptr<sf::Texture>(new sf::Texture());
+    _texture->loadFromImage(_pixelView);
+    _sprite->setTexture(*_texture.get());
 }
