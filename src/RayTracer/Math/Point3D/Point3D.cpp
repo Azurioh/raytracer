@@ -7,6 +7,10 @@
 
 #include "Point3D.hh"
 
+Math::Point3D::Point3D(): _x(0.0), _y(0.0), _z(0.0)
+{
+}
+
 Math::Point3D::Point3D(double x, double y, double z): _x(x), _y(y), _z(z)
 {
 }

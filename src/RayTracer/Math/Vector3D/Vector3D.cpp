@@ -6,8 +6,13 @@
 */
 
 #include <cmath>
+#include <iostream>
 #include "Vector3D.hh"
 #include "Math/Point3D/Point3D.hh"
+
+Math::Vector3D::Vector3D(): _x(0.0), _y(0.0), _z(0.0)
+{
+}
 
 Math::Vector3D::Vector3D(double x, double y, double z): _x(x), _y(y), _z(z)
 {
@@ -26,17 +31,17 @@ Math::Vector3D::Vector3D(const Math::Vector3D &vector): _x(vector.getX()), _y(ve
 
 double Math::Vector3D::getX(void) const
 {
-	return _x;
+    return _x;
 }
 
 double Math::Vector3D::getY(void) const
 {
-	return _y;
+    return _y;
 }
 
 double Math::Vector3D::getZ(void) const
 {
-	return _z;
+    return _z;
 }
 
 void Math::Vector3D::setX(double x)
@@ -146,3 +151,4 @@ bool Math::Vector3D::operator!=(Vector3D const& vector) const
 {
     return !(*this == vector);
 }
+
