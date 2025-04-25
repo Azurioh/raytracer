@@ -8,7 +8,6 @@
 #pragma once
 
 #include <memory>
-#include <SFML/Graphics.hpp>
 
 #include "RayTracer/Camera/Camera.hh"
 #include "RayTracer/GUI/GUI.hh"
