@@ -9,11 +9,11 @@
 #include "Math/Point3D/Point3D.hh"
 #include "Math/Vector3D/Vector3D.hh"
 
-RayTracer::Camera::Camera(): _origin(0, 0, 1400)
+RayTracer::Camera::Camera(): _origin(0, 0, 1900)
 {
-    _screen.setOrigin(Math::Point3D(-400, -400, 0));
-    _screen.setBottomSide(Math::Vector3D(800, 0, 0));
-    _screen.setLeftSide(Math::Vector3D(0, 800, 0));
+    _screen.setOrigin(Math::Point3D(-200, -200, 0));
+    _screen.setBottomSide(Math::Vector3D(400, 0, 0));
+    _screen.setLeftSide(Math::Vector3D(0, 400, 0));
 }
 
 Math::Point3D RayTracer::Camera::getOrigin(void) const
