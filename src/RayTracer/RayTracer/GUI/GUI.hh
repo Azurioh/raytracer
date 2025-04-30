@@ -7,41 +7,32 @@
 
 #pragma once
 
-#include <condition_variable>
-#include <mutex>
+#include <cstdint>
 #include <memory>
-#include <thread>
+#include <tuple>
 #include <SFML/Graphics.hpp>
-#include "RayTracer/Camera/Camera.hh"
-#include "RayTracer/Primitives/Sphere/Sphere.hh"
+#include "RayTracer/Scene/Scene.hh"
 
 namespace RayTracer
 {
     class GUI {
         public:
-            GUI(std::vector<RayTracer::Primitives::Sphere> spheres, RayTracer::Camera& camera, sf::Image& pixelView,
-                std::string windowTitle = "SFML Window", std::size_t nbThreads = 1);
+            GUI(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t>>> pixels);
             ~GUI();
 
-            void render(void);
-            bool isOpen(void);
+            Scene::CameraMovement render(void);
+            bool isOpen(void) const;
+            bool isNeedRefresh(void) const;
+
+            void refresh(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t>>> pixels);
 
         private:
-            sf::RenderWindow _window;
-            sf::Image& _pixelView;
+            std::unique_ptr<sf::RenderWindow> _window;
+            std::unique_ptr<sf::Image> _image;
             std::unique_ptr<sf::Texture> _texture;
             std::unique_ptr<sf::Sprite> _sprite;
-            std::vector<RayTracer::Primitives::Sphere> _spheres;
-            RayTracer::Camera& _cam;
-            std::vector<std::thread> _threads;
-            std::vector<bool> _renderComplete;
-            std::mutex _pixelMutex;
-            std::mutex _camMutex;
-            std::condition_variable _camCv;
-            std::atomic<bool> _camChanged{false};
+            bool _needRefresh;
 
-            void _handleEvents(void);
-            void _refreshRender(std::size_t yStart, std::size_t nbStep, std::size_t threadIndex);
-            bool _renderIsFinished(void);
+            Scene::CameraMovement _handleEvents(void);
     };
 }

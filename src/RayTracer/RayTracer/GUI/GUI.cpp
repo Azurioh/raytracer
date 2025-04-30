@@ -5,194 +5,101 @@
 ** GUI
 */
 
-#include <algorithm>
-#include <execution>
+#include <cstddef>
 #include <iostream>
-#include <vector>
 #include "GUI.hh"
 
-RayTracer::GUI::GUI(std::vector<RayTracer::Primitives::Sphere> spheres, RayTracer::Camera &camera, sf::Image& pixelView, std::string windowTitle, std::size_t nbThreads):
-    _window(sf::VideoMode(pixelView.getSize().x, pixelView.getSize().y), windowTitle), _pixelView(pixelView),
-    _texture(std::make_unique<sf::Texture>()), _sprite(std::make_unique<sf::Sprite>()), _spheres(spheres), _cam(camera)
+RayTracer::GUI::GUI(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t>>> pixels):
+    _window(std::make_unique<sf::RenderWindow>(sf::VideoMode(pixels[0].size(), pixels.size()), "RayTracer GUI")),
+    _image(std::make_unique<sf::Image>()), _texture(std::make_unique<sf::Texture>()), _sprite(std::make_unique<sf::Sprite>()), _needRefresh(true)
 {
-    std::size_t maxThreads = std::thread::hardware_concurrency();
-    double yAxis = _cam.getScreen().getBottomSide().length();
+    sf::Color color;
 
-    if (maxThreads == 0) {
-        maxThreads = 1;
+    _image->create(pixels[0].size(), pixels.size());
+    for (std::size_t i = 0; i < pixels.size(); i++) {
+        for (std::size_t j = 0; j < pixels[i].size(); j++) {
+            color.r = std::get<0>(pixels[i][j]);
+            color.g = std::get<1>(pixels[i][j]);
+            color.b = std::get<2>(pixels[i][j]);
+            _image->setPixel(j, i, color);
+        }
     }
-    _camChanged = true;
-    for (std::size_t i = 0; i < std::min(maxThreads, nbThreads); i++) {
-        _renderComplete.push_back(true);
-        _threads.push_back(std::thread(&GUI::_refreshRender, this, i * (yAxis / nbThreads), (yAxis / nbThreads), i));
-    }
+    _texture->loadFromImage(*_image);
+    _sprite->setTexture(*_texture);
 }
 
 RayTracer::GUI::~GUI()
 {
 }
 
-void RayTracer::GUI::render(void)
+RayTracer::Scene::CameraMovement RayTracer::GUI::render(void)
 {
-    bool refresh = true;
-    if (!_window.isOpen()) {
-        return;
-    }
-    _handleEvents();
+    Scene::CameraMovement movement = _handleEvents();
 
-    for (auto finish : _renderComplete) {
-        if (!finish) {
-            refresh = false;
-            break;
+    _window->clear();
+    _window->draw(*_sprite);
+    _window->display();
+    return movement;
+}
+
+bool RayTracer::GUI::isOpen(void) const
+{
+    return _window->isOpen();
+}
+
+bool RayTracer::GUI::isNeedRefresh(void) const
+{
+    return _needRefresh;
+}
+
+void RayTracer::GUI::refresh(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t>>> pixels)
+{
+    sf::Color color;
+
+    for (std::size_t i = 0; i < pixels.size(); i++) {
+        for (std::size_t j = 0; j < pixels[i].size(); j++) {
+            color.r = std::get<0>(pixels[i][j]);
+            color.g = std::get<1>(pixels[i][j]);
+            color.b = std::get<2>(pixels[i][j]);
+            _image->setPixel(j, i, color);
         }
     }
-    if (refresh) {
-        _texture->loadFromImage(_pixelView);
-        _sprite->setTexture(*_texture);
-    }
-    _window.clear();
-    _window.draw(*_sprite);
-    _window.display();
+    _texture->loadFromImage(*_image.get());
+    _sprite->setTexture(*_texture.get());
 }
 
-bool RayTracer::GUI::isOpen(void)
-{
-    return _window.isOpen();
-}
-
-void RayTracer::GUI::_handleEvents(void)
+RayTracer::Scene::CameraMovement RayTracer::GUI::_handleEvents(void)
 {
     sf::Event event;
 
-    _camChanged = false;
-    while (_window.pollEvent(event)) {
+    while (_window->pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
-            _window.close();
+            _window->close();
+            return Scene::CameraMovement::WINDOW_CLOSED;
         }
-        if (event.type != sf::Event::KeyPressed || !_renderIsFinished()) {
-            continue;
+        if (event.type != sf::Event::KeyReleased) {
+            return Scene::CameraMovement::NOTHING;
         }
-        if (event.key.code == sf::Keyboard::Z) {
-            _cam.moveCamera(Math::Vector3D(0, 0, -10));
-        } else if (event.key.code == sf::Keyboard::Q) {
-            _cam.moveCamera(Math::Vector3D(-10, 0, 0));
-        } else if (event.key.code == sf::Keyboard::D) {
-            _cam.moveCamera(Math::Vector3D(10, 0, 0));
-        } else if (event.key.code == sf::Keyboard::S) {
-            _cam.moveCamera(Math::Vector3D(0, 0, 10));
-        } else if (event.key.code == sf::Keyboard::Space) {
-            _cam.moveCamera(Math::Vector3D(0, -10, 0));
-        } else if (event.key.code == sf::Keyboard::LShift) {
-            _cam.moveCamera(Math::Vector3D(0, 10, 0));
-        } else {
-            continue;
-        }
-        {
-            std::lock_guard<std::mutex> lk(_camMutex);
-            _camChanged = true;
-        }
-        _camCv.notify_all();
-    }
-}
-
-void RayTracer::GUI::_refreshRender(std::size_t yStart, std::size_t nbStep, std::size_t threadIndex)
-{
-    std::unique_lock<std::mutex> lk(_camMutex);
-    while (_window.isOpen()) {
-        _camCv.wait(lk, [&]{ return _camChanged.load(); });
-
-        double lightIntensity = 0.9;
-        double ambientFactor = 0.2;
-        double diffuseFactor = 0;
-        double light = (ambientFactor + diffuseFactor * (1 - ambientFactor)) * lightIntensity;
-        double xAxis = _cam.getScreen().getLeftSide().length();
-        double yAxis = _cam.getScreen().getBottomSide().length();
-        Math::Vector3D lightDir(1, 1, 1);
-        RayTracer::Ray ray;
-        std::vector<std::pair<RayTracer::Primitives::Sphere, double>> closest;
-
-        _renderComplete[threadIndex] = false;
-        lk.unlock();
-        lightDir.normalize();
-
-        for (double y = yStart; y < yStart + nbStep; y++) {
-            for (double x = 0; x < xAxis; x++) {
-                double u = x / xAxis;
-                double v = y / yAxis;
-                ray = _cam.ray(u, v);
-                closest.clear();
-
-                for (auto s : _spheres) {
-                    std::vector<double> t = s.hits(ray);
-                    if (t.empty()) {
-                        continue;
-                    }
-                    if (closest.size() == 0) {
-                        closest.push_back({s, t[1]});
-                    } else if (t[1] < closest[0].second) {
-                        closest.clear();
-                        closest.push_back({s, t[1]});
-                    }
-                }
-
-                if (closest.empty()) {
-                    _pixelView.setPixel(x, y, sf::Color::Transparent);
-                    continue;
-                }
-
-                Math::Vector3D hitPosition = (ray.getDirection() * closest[0].second) + ray.getOrigin();
-                Math::Vector3D normal = hitPosition - closest[0].first.center;
-                normal.normalize();
-                Math::Point3D shadowOrigin = hitPosition + normal * 1e-4;
-                RayTracer::Ray shadowRay(shadowOrigin, lightDir);
-                sf::Color color = sf::Color::Red;
-                bool inShadow = false;
-
-                for (auto &s : _spheres) {
-                    if (&s == &closest[0].first) {
-                        continue;
-                    }
-
-                    std::vector<double> t = s.hits(shadowRay);
-                    for (double tValue : t) {
-                        if (tValue > 1e-4) {
-                            inShadow = true;
-                            break;
-                        }
-                    }
-                    if (inShadow) {
-                        break;
-                    }
-                }
-
-                if (inShadow) {
-                    diffuseFactor = 0.0;
-                } else {
-                    diffuseFactor = std::max(normal.dot(lightDir), 0.0);
-                }
-                light = (ambientFactor + diffuseFactor * (1 - ambientFactor)) * lightIntensity;
-                color.r = std::min(static_cast<int>(color.r * light), 255);
-                color.g = std::min(static_cast<int>(color.g * light), 255);
-                color.b = std::min(static_cast<int>(color.b * light), 255);
-                {
-                    std::lock_guard<std::mutex> lock(_pixelMutex);
-                    _pixelView.setPixel(static_cast<unsigned int>(x),
-                        static_cast<unsigned int>(y),
-                        color);
-                }
-            }
-        }
-        _renderComplete[threadIndex] = true;
-        lk.lock();
-    }
-}
-
-bool RayTracer::GUI::_renderIsFinished(void)
-{
-    for (auto finish : _renderComplete) {
-        if (!finish) {
-            return false;
+        switch (event.key.code) {
+            case sf::Keyboard::Z:
+                return Scene::CameraMovement::FRONT;
+            case sf::Keyboard::S:
+                return Scene::CameraMovement::BACK;
+            case sf::Keyboard::Q:
+                return Scene::CameraMovement::LEFT;
+            case sf::Keyboard::D:
+                return Scene::CameraMovement::RIGHT;
+            case sf::Keyboard::A:
+                return Scene::CameraMovement::LEFT_ANGLE;
+            case sf::Keyboard::E:
+                return Scene::CameraMovement::RIGHT_ANGLE;
+            case sf::Keyboard::R:
+                return Scene::CameraMovement::UP_ANGLE;
+            case sf::Keyboard::F:
+                return Scene::CameraMovement::DOWN_ANGLE;
+            default:
+                return Scene::CameraMovement::NOTHING;
         }
     }
-    return true;
+    return Scene::CameraMovement::NOTHING;
 }
