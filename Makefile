@@ -13,13 +13,17 @@ RAYTRACER_OBJ   =   $(RAYTRACER_SRC:.cpp=.o)
 ERROR_FLAGS =   -Werror -Wall -Wextra -Wpedantic
 INCLUDES    =   -I src/RayTracer
 
-CXXFLAGS    +=  $(ERROR_FLAGS) $(INCLUDES) -std=c++20 -g
+CXXFLAGS    +=  $(ERROR_FLAGS) $(INCLUDES) -std=c++20
 
-all: raytracer
+all: $(NAME)
 
-raytracer: LDFLAGS  += -lsfml-window -lsfml-system -lsfml-graphics
-raytracer: $(RAYTRACER_OBJ)
+$(NAME): LDFLAGS  += -lsfml-window -lsfml-system -lsfml-graphics
+$(NAME): $(RAYTRACER_OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+valgrind: CXXFLAGS	+= -g
+valgrind: $(NAME)
+	valgrind --leak-check=full --track-origins=yes ./$(NAME)
 
 clean:
 	find src/RayTracer -type f -name "*.o" -delete
@@ -29,4 +33,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all raytracer clean fclean re
+.PHONY: all $(NAME) clean fclean re
