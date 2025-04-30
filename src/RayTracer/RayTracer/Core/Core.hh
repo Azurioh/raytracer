@@ -9,20 +9,20 @@
 
 #include <memory>
 
-#include "RayTracer/Camera/Camera.hh"
 #include "RayTracer/GUI/GUI.hh"
-#include "RayTracer/Primitives/Sphere/Sphere.hh"
+#include "RayTracer/Scene/Scene.hh"
 
-class Core {
-    public:
-        Core();
-        ~Core();
+namespace RayTracer
+{
+    class Core {
+        public:
+            Core();
+            ~Core() = default;
 
-        void start(void);
+            void start(void);
 
-    private:
-        std::vector<RayTracer::Primitives::Sphere> _spheres;
-        RayTracer::Camera _camera;
-        sf::Image _pixelView;
-        std::unique_ptr<RayTracer::GUI> _gui;
-};
+        private:
+            std::unique_ptr<RayTracer::Scene> _scene;
+            std::unique_ptr<RayTracer::GUI> _gui;
+    };
+}
