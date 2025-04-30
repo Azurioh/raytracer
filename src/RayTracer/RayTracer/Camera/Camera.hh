@@ -9,7 +9,7 @@
 
 #include "Math/Point3D/Point3D.hh"
 #include "RayTracer/Ray/Ray.hh"
-#include "RayTracer/Screen/Screen.hh"
+#include "Screen/Screen.hh"
 
 namespace RayTracer
 {
