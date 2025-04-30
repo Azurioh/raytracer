@@ -10,7 +10,7 @@
 
 std::int32_t main()
 {
-    Core core;
+    RayTracer::Core core;
 
     core.start();
     return 0;

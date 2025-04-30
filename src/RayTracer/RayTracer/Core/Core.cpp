@@ -7,25 +7,24 @@
 
 #include "Core.hh"
 
-Core::Core(): _camera()
-{
-    RayTracer::Screen screen = _camera.getScreen();
-
-    _pixelView.create(screen.getBottomSide().length(), screen.getLeftSide().length());
-    _spheres = {
-        RayTracer::Primitives::Sphere(Math::Point3D(0, 0, -100), 200),
-        RayTracer::Primitives::Sphere(Math::Point3D(200, 100, 100), 20),
-    };
-    _gui = std::unique_ptr<RayTracer::GUI>(new RayTracer::GUI(_spheres, _camera, _pixelView, "SFML", 8));
-}
-
-Core::~Core()
+RayTracer::Core::Core(): _scene(std::make_unique<RayTracer::Scene>()), _gui(std::make_unique<RayTracer::GUI>(_scene->getPixels()))
 {
 }
 
-void Core::start(void)
+void RayTracer::Core::start(void)
 {
+    RayTracer::Scene::CameraMovement movement;
+
     while (_gui->isOpen()) {
-        _gui->render();
+        movement = _gui->render();
+        if (movement == RayTracer::Scene::CameraMovement::WINDOW_CLOSED) {
+            break;
+        }
+        if (movement == RayTracer::Scene::NOTHING) {
+            continue;
+        }
+        _scene->moveCamera(movement);
+        _scene->makeRender();
+        _gui->refresh(_scene->getPixels());
     }
 }

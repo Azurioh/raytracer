@@ -11,9 +11,12 @@
 
 RayTracer::Camera::Camera(): _origin(0, 0, 1900)
 {
-    _screen.setOrigin(Math::Point3D(-200, -200, 0));
-    _screen.setBottomSide(Math::Vector3D(400, 0, 0));
-    _screen.setLeftSide(Math::Vector3D(0, 400, 0));
+    double width = 1920;
+    double height = 1080;
+
+    _screen.setOrigin(Math::Point3D(-(width / 2), -(height / 2), 0));
+    _screen.setBottomSide(Math::Vector3D(width, 0, 0));
+    _screen.setLeftSide(Math::Vector3D(0, height, 0));
 }
 
 Math::Point3D RayTracer::Camera::getOrigin(void) const
