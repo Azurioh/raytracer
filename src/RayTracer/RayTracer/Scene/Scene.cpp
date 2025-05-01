@@ -77,6 +77,23 @@ void RayTracer::Scene::moveCamera(CameraMovement movement)
                 newOrigin = tmp + _camera->getOrigin();
             }
             break;
+        case LEFT_ANGLE:
+            newLeft.rotateY(1);
+            newBottom.rotateY(1);
+            {
+                Math::Vector3D tmp = screen.getOrigin() - _camera->getOrigin();
+                tmp.rotateY(1);
+                newOrigin = tmp + _camera->getOrigin();
+            }
+            break;
+        case RIGHT_ANGLE:
+            newLeft.rotateY(-1);
+            newBottom.rotateY(-1);
+            {
+                Math::Vector3D tmp = screen.getOrigin() - _camera->getOrigin();
+                tmp.rotateY(-1);
+                newOrigin = tmp + _camera->getOrigin();
+            }
         default:
             break;
     }
