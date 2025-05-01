@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include "Math/Point3D/Point3D.hh"
 #include "RayTracer/Ray/Ray.hh"
 #include "Screen/Screen.hh"
@@ -21,6 +22,8 @@ namespace RayTracer
 
             Math::Point3D getOrigin(void) const;
             RayTracer::Screen getScreen(void) const;
+            double getScreenWidth(void) const;
+            double getScreenHeight(void) const;
 
             void setOrigin(const Math::Point3D& origin);
             void setScreen(const RayTracer::Screen& screen);
@@ -31,5 +34,7 @@ namespace RayTracer
         private:
             Math::Point3D _origin;
             RayTracer::Screen _screen;
+            double _screenWidth;
+            double _screenHeight;
     };
 }

@@ -9,14 +9,11 @@
 #include "Math/Point3D/Point3D.hh"
 #include "Math/Vector3D/Vector3D.hh"
 
-RayTracer::Camera::Camera(): _origin(0, 0, 1900)
+RayTracer::Camera::Camera(): _origin(0, 0, 1900), _screenWidth(720), _screenHeight(720)
 {
-    double width = 1920;
-    double height = 1080;
-
-    _screen.setOrigin(Math::Point3D(-(width / 2), -(height / 2), 0));
-    _screen.setBottomSide(Math::Vector3D(width, 0, 0));
-    _screen.setLeftSide(Math::Vector3D(0, height, 0));
+    _screen.setOrigin(Math::Point3D(-(_screenWidth / 2), -(_screenHeight / 2), 0));
+    _screen.setBottomSide(Math::Vector3D(_screenWidth, 0, 0));
+    _screen.setLeftSide(Math::Vector3D(0, _screenHeight, 0));
 }
 
 Math::Point3D RayTracer::Camera::getOrigin(void) const
@@ -37,6 +34,16 @@ void RayTracer::Camera::setOrigin(const Math::Point3D& origin)
 void RayTracer::Camera::setScreen(const RayTracer::Screen& screen)
 {
 	_screen = screen;
+}
+
+double RayTracer::Camera::getScreenWidth(void) const
+{
+	return _screenWidth;
+}
+
+double RayTracer::Camera::getScreenHeight(void) const
+{
+	return _screenHeight;
 }
 
 RayTracer::Ray RayTracer::Camera::ray(double u, double v)
