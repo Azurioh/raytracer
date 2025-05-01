@@ -14,7 +14,7 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
 {
     Factories::Primitive::FlatFactory factory;
 
-    _primitives.push_back(factory.createSphere(Math::Point3D(100, 100, 100), 20));
+    _primitives.push_back(factory.createSphere(Math::Point3D(100, 100, 100), 50));
     _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, 0), 100));
     _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(1, 1, 1))));
 
@@ -37,34 +37,60 @@ void RayTracer::Scene::setPixels(std::vector<std::vector<std::tuple<std::uint8_t
 
 void RayTracer::Scene::moveCamera(CameraMovement movement)
 {
-    Math::Point3D pos = _camera->getOrigin();
-    Math::Point3D screenPos = _camera->getScreen().getOrigin();
+    Screen screen = _camera->getScreen();
+    Math::Point3D newOrigin = screen.getOrigin();
+    Math::Vector3D newLeft = screen.getLeftSide();
+    Math::Vector3D newBottom = screen.getBottomSide();
 
     switch (movement) {
         case FRONT:
-            _camera->moveCamera(Math::Vector3D(0, 0, -100));
+            _camera->moveCamera({0,0,-100});
+            newOrigin += Math::Vector3D(0,0,-100);
             break;
         case BACK:
-            _camera->moveCamera(Math::Vector3D(0, 0, 100));
+            _camera->moveCamera({0,0,100});
+            newOrigin += Math::Vector3D(0,0,100);
             break;
         case LEFT:
-            _camera->moveCamera(Math::Vector3D(-100, 0, 0));
+            _camera->moveCamera({-100,0,0});
+            newOrigin += Math::Vector3D(-100,0,0);
             break;
         case RIGHT:
-            _camera->moveCamera(Math::Vector3D(100, 0, 0));
+            _camera->moveCamera({100,0,0});
+            newOrigin += Math::Vector3D(100,0,0);
+            break;
+        case UP_ANGLE:
+            newLeft.rotateX(-1);
+            newBottom.rotateX(-1);
+            {
+                Math::Vector3D tmp = screen.getOrigin() - _camera->getOrigin();
+                tmp.rotateX(-1);
+                newOrigin = tmp + _camera->getOrigin();
+            }
+            break;
+        case DOWN_ANGLE:
+            newLeft.rotateX(1);
+            newBottom.rotateX(1);
+            {
+                Math::Vector3D tmp = screen.getOrigin() - _camera->getOrigin();
+                tmp.rotateX(1);
+                newOrigin = tmp + _camera->getOrigin();
+            }
             break;
         default:
             break;
     }
-    _camera->setOrigin(pos);
-    _camera->getScreen().setOrigin(screenPos);
+    screen.setOrigin(newOrigin);
+    screen.setLeftSide(newLeft);
+    screen.setBottomSide(newBottom);
+    _camera->setScreen(screen);
 }
 
 void RayTracer::Scene::makeRender(void)
 {
     unsigned int nbThreads = std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1));
-    std::size_t nbLines = _camera->getScreen().getLeftSide().getY();
-    std::size_t nbCols = _camera->getScreen().getBottomSide().getX();
+    std::size_t nbLines = _camera->getScreenHeight();
+    std::size_t nbCols = _camera->getScreenWidth();
     std::vector<std::thread> threads;
     unsigned int i = 0;
 
@@ -166,8 +192,8 @@ void RayTracer::Scene::_renderThreading(std::size_t yStart, std::size_t nbStep)
 
     double u;
     double v;
-    double yAxis = _camera->getScreen().getLeftSide().getY();
-    double xAxis = _camera->getScreen().getBottomSide().getX();
+    double yAxis = _camera->getScreenHeight();
+    double xAxis = _camera->getScreenWidth();
 
     for (double y = yStart; y < yStart + nbStep && y < yAxis; y++) {
         for (double x = 0; x < xAxis; x++) {
