@@ -46,6 +46,7 @@ namespace RayTracer
 
             void moveCamera(CameraMovement movement);
             void makeRender(void);
+            void exportToOutputFile(void);
 
         private:
             std::unique_ptr<Camera> _camera;
