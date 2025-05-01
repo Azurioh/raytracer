@@ -25,6 +25,9 @@ namespace Math {
             void setY(double x);
             void setZ(double x);
 
+            void rotateX(double angle);
+            void rotateY(double angle);
+
             double length(void) const;
             double dot(Vector3D const& vector) const;
             void normalize(void);
