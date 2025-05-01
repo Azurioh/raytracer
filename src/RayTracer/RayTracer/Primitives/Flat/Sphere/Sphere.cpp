@@ -11,7 +11,7 @@
 
 RayTracer::Primitives::Flat::Sphere::Sphere(Math::Point3D center, double radius): APrimitive(center), _radius(radius)
 {
-    _color = {255, 0, 0};
+    _color = {50, 130, 199};
 }
 
 RayTracer::Primitives::Flat::Sphere::~Sphere()
