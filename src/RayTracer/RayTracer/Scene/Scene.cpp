@@ -6,6 +6,7 @@
 */
 
 #include <iostream>
+#include <fstream>
 #include "Scene.hh"
 #include "RayTracer/Primitives/Flat/Sphere/Sphere.hh"
 #include "RayTracer/Factories/Primitives/FlatFactory/FlatFactory.hh"
@@ -19,6 +20,7 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
     _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(1, 1, 1))));
 
     makeRender();
+    exportToOutputFile();
 }
 
 RayTracer::Scene::~Scene()
@@ -127,6 +129,28 @@ void RayTracer::Scene::makeRender(void)
     for (std::size_t i = 0; i < threads.size(); i++) {
         threads[i].join();
     }
+}
+
+void RayTracer::Scene::exportToOutputFile(void)
+{
+    std::ofstream file("output.ppm");
+
+    if (!file.is_open()) {
+        std::cerr << "Can't write in the output.ppm file" << std::endl;
+        return;
+    }
+    file << "P3\n";
+    file << _pixels[0].size() << " " << _pixels.size() << "\n";
+    file << "255\n";
+    for (auto lines : _pixels) {
+        for (auto pixel : lines) {
+            file << static_cast<int>(std::get<0>(pixel)) << " "
+                 << static_cast<int>(std::get<1>(pixel)) << " "
+                 << static_cast<int>(std::get<2>(pixel)) << "\n";
+        }
+    }
+    file.close();
+    std::cout << "Image exported in the output.ppm file" << std::endl;
 }
 
 std::pair<RayTracer::IPrimitive *, double> RayTracer::Scene::_getClosestPrimitive(RayTracer::Ray ray)
