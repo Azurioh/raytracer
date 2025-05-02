@@ -39,6 +39,7 @@ temporary/
 .DS_Store
 compile_commands.json
 *.log
+output.ppm
 
 # Doxygen
 docs/
