@@ -26,12 +26,12 @@ Math::Point3D RayTracer::Screen::getOrigin(void) const
     return _origin;
 }
 
-Math::Vector3D RayTracer::Screen::getBottomSide(void) const
+const Math::Vector3D& RayTracer::Screen::getBottomSide(void) const
 {
 	return _bottomSide;
 }
 
-Math::Vector3D RayTracer::Screen::getLeftSide(void) const
+const Math::Vector3D& RayTracer::Screen::getLeftSide(void) const
 {
 	return _leftSide;
 }
@@ -54,8 +54,8 @@ void RayTracer::Screen::setLeftSide(const Math::Vector3D& vector)
 Math::Point3D RayTracer::Screen::pointAt(double u, double v)
 {
     Math::Point3D result = _origin;
-    Math::Vector3D movement(_bottomSide.length() * u, _leftSide.length() * v, 0);
 
-    result += movement;
+    result += _bottomSide * u;
+    result += _leftSide * v;
     return result;
 }

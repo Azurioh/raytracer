@@ -19,8 +19,8 @@ namespace RayTracer
             ~Screen();
 
             Math::Point3D getOrigin(void) const;
-            Math::Vector3D getBottomSide(void) const;
-            Math::Vector3D getLeftSide(void) const;
+            const Math::Vector3D& getBottomSide(void) const;
+            const Math::Vector3D& getLeftSide(void) const;
 
             void setOrigin(const Math::Point3D& point);
             void setBottomSide(const Math::Vector3D& vector);

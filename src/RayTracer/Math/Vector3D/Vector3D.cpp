@@ -6,8 +6,10 @@
 */
 
 #include <cmath>
+#include <numbers>
 #include <iostream>
 #include "Vector3D.hh"
+#include "Math/Matrix/Matrix.hh"
 #include "Math/Point3D/Point3D.hh"
 
 Math::Vector3D::Vector3D(): _x(0.0), _y(0.0), _z(0.0)
@@ -57,6 +59,36 @@ void Math::Vector3D::setY(double y)
 void Math::Vector3D::setZ(double z)
 {
     _z = z;
+}
+
+void Math::Vector3D::rotateX(double angle)
+{
+    double radian = angle * (std::numbers::pi / 180);
+    Math::Matrix rotationMatrix({
+        {1, 0, 0},
+        {0, std::cos(radian), -std::sin(radian)},
+        {0, std::sin(radian),  std::cos(radian)}
+    });
+    Math::Vector3D newDirection = rotationMatrix.applyMatrixToVector(*this);
+
+    _x = newDirection.getX();
+    _y = newDirection.getY();
+    _z = newDirection.getZ();
+}
+
+void Math::Vector3D::rotateY(double angle)
+{
+    double radian = angle * (std::numbers::pi / 180.0);
+    Math::Matrix rotationMatrix({
+        { std::cos(radian), 0, std::sin(radian)},
+        { 0, 1, 0 },
+        { -std::sin(radian), 0, std::cos(radian)}
+    });
+    Math::Vector3D newDirection = rotationMatrix.applyMatrixToVector(*this);
+
+    _x = newDirection.getX();
+    _y = newDirection.getY();
+    _z = newDirection.getZ();
 }
 
 double Math::Vector3D::length(void) const
