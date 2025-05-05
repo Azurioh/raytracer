@@ -16,9 +16,11 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
     Factories::Primitive::FlatFactory factory;
 
     _primitives.push_back(factory.createSphere(Math::Point3D(100, 100, 100), 50));
+    _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, -400), 25));
     _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, 0), 100));
     _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(1, 1, 1))));
 
+    _primitives[1]->setColor({255, 0, 0, 255});
     makeRender();
     exportToOutputFile();
 }
@@ -27,12 +29,12 @@ RayTracer::Scene::~Scene()
 {
 }
 
-std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t>>> RayTracer::Scene::getPixels(void) const
+std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> RayTracer::Scene::getPixels(void) const
 {
 	return _pixels;
 }
 
-void RayTracer::Scene::setPixels(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t>>> pixels)
+void RayTracer::Scene::setPixels(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> pixels)
 {
 	_pixels = pixels;
 }
@@ -153,6 +155,30 @@ void RayTracer::Scene::exportToOutputFile(void)
     std::cout << "Image exported in the output.ppm file" << std::endl;
 }
 
+std::vector<std::pair<RayTracer::IPrimitive *, std::vector<double>>> RayTracer::Scene::_getHitPrimitive(RayTracer::Ray ray)
+{
+    std::vector<std::pair<RayTracer::IPrimitive *, std::vector<double>>> hitPrimitives;
+    std::pair<RayTracer::IPrimitive *, std::vector<double>> tmp;
+    std::vector<double> tValues;
+
+    for (auto it = _primitives.begin(); it != _primitives.end(); it++) {
+        tValues = (*it)->hits(ray);
+        if (tValues.empty()) {
+            continue;
+        }
+        hitPrimitives.push_back({it->get(), tValues});
+    }
+    for (int i = 0; static_cast<std::size_t>(i + 1) < hitPrimitives.size(); i++) {
+        if (hitPrimitives[i].second[1] > hitPrimitives[i + 1].second[1]) {
+            tmp = hitPrimitives[i];
+            hitPrimitives[i] = hitPrimitives[i + 1];
+            hitPrimitives[i + 1] = tmp;
+            i = -1;
+        }
+    }
+    return hitPrimitives;
+}
+
 std::pair<RayTracer::IPrimitive *, double> RayTracer::Scene::_getClosestPrimitive(RayTracer::Ray ray)
 {
     std::pair<RayTracer::IPrimitive *, double> closest = {nullptr, 0};
@@ -170,7 +196,7 @@ std::pair<RayTracer::IPrimitive *, double> RayTracer::Scene::_getClosestPrimitiv
     return closest;
 }
 
-std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Scene::_getColor(RayTracer::IPrimitive *primitive, double determinant, RayTracer::Ray ray)
+std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Scene::_getColor(RayTracer::IPrimitive *primitive, double determinant, RayTracer::Ray ray)
 {
     Math::Vector3D hitPosition = (ray.getDirection() * determinant) + ray.getOrigin();
     Math::Vector3D normal = hitPosition - primitive->getCenter();
@@ -214,23 +240,27 @@ bool RayTracer::Scene::_isInShadow(RayTracer::IPrimitive *primitive, RayTracer::
     return false;
 }
 
-std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Scene::_applyLightOnPixel(RayTracer::IPrimitive *primitive, double light)
+std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Scene::_applyLightOnPixel(RayTracer::IPrimitive *primitive, double light)
 {
-    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> color = primitive->getColor();
+    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color = primitive->getColor();
 
     color = {
-        std::min(static_cast<int>(std::get<0>(color) * light), 255),
-        std::min(static_cast<int>(std::get<1>(color) * light), 255),
-        std::min(static_cast<int>(std::get<2>(color) * light), 255),
+        std::min(static_cast<int>(std::get<0>(color) * light), static_cast<int>(std::get<3>(color))),
+        std::min(static_cast<int>(std::get<1>(color) * light), static_cast<int>(std::get<3>(color))),
+        std::min(static_cast<int>(std::get<2>(color) * light), static_cast<int>(std::get<3>(color))),
+        std::get<3>(color)
     };
     return color;
 }
 
 void RayTracer::Scene::_renderThreading(std::size_t yStart, std::size_t nbStep)
 {
-    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> color;
+    std::vector<std::pair<RayTracer::IPrimitive *, std::vector<double>>> hitPrimitives;
+    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color;
+    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> tmpColor;
+    std::size_t tmpOpacity;
     RayTracer::Ray ray;
-
+    std::size_t i = 0;
     double u;
     double v;
     double yAxis = _camera->getScreenHeight();
@@ -242,13 +272,29 @@ void RayTracer::Scene::_renderThreading(std::size_t yStart, std::size_t nbStep)
             v = y / yAxis;
             ray = _camera->ray(u, v);
 
-            std::pair<RayTracer::IPrimitive *, double> closest = _getClosestPrimitive(ray);
-            if (closest.first == nullptr) {
-                _pixels[y][x] = {0, 0, 0};
+            hitPrimitives = _getHitPrimitive(ray);
+            if (hitPrimitives.empty()) {
+                _pixels[y][x] = {0, 0, 0, 255};
                 continue;
             }
 
-            color = _getColor(closest.first, closest.second, ray);
+            tmpColor = _getColor(hitPrimitives[0].first, hitPrimitives[0].second[1], ray);
+            i = 1;
+            color = tmpColor;
+            if (std::get<3>(tmpColor) < 255) {
+                while (std::get<3>(color) < 255 && i < hitPrimitives.size()) {
+                    tmpColor = _getColor(hitPrimitives[i].first, hitPrimitives[i].second[1], ray);
+                    tmpOpacity = std::get<3>(tmpColor);
+                    double remainingOpacity = (255 - std::get<3>(color)) / 255.0;
+                    color = {
+                        std::get<0>(color) + (std::get<0>(tmpColor) * remainingOpacity),
+                        std::get<1>(color) + (std::get<1>(tmpColor) * remainingOpacity),
+                        std::get<2>(color) + (std::get<2>(tmpColor) * remainingOpacity),
+                        std::min(255.0, std::get<3>(color) + static_cast<double>(tmpOpacity))
+                    };
+                    i++;
+                }
+            }
             _pixels[y][x] = color;
         }
     }
