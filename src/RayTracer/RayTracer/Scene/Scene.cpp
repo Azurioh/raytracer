@@ -29,12 +29,12 @@ RayTracer::Scene::~Scene()
 {
 }
 
-std::vector<std::vector<std::tuple<double, double, double, double>>> RayTracer::Scene::getPixels(void) const
+std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> RayTracer::Scene::getPixels(void) const
 {
 	return _pixels;
 }
 
-void RayTracer::Scene::setPixels(std::vector<std::vector<std::tuple<double, double, double, double>>> pixels)
+void RayTracer::Scene::setPixels(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> pixels)
 {
 	_pixels = pixels;
 }
@@ -196,7 +196,7 @@ std::pair<RayTracer::IPrimitive *, double> RayTracer::Scene::_getClosestPrimitiv
     return closest;
 }
 
-std::tuple<double, double, double, double> RayTracer::Scene::_getColor(RayTracer::IPrimitive *primitive, double determinant, RayTracer::Ray ray)
+std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Scene::_getColor(RayTracer::IPrimitive *primitive, double determinant, RayTracer::Ray ray)
 {
     Math::Vector3D hitPosition = (ray.getDirection() * determinant) + ray.getOrigin();
     Math::Vector3D normal = hitPosition - primitive->getCenter();
@@ -240,9 +240,9 @@ bool RayTracer::Scene::_isInShadow(RayTracer::IPrimitive *primitive, RayTracer::
     return false;
 }
 
-std::tuple<double, double, double, double> RayTracer::Scene::_applyLightOnPixel(RayTracer::IPrimitive *primitive, double light)
+std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Scene::_applyLightOnPixel(RayTracer::IPrimitive *primitive, double light)
 {
-    std::tuple<double, double, double, double> color = primitive->getColor();
+    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color = primitive->getColor();
 
     color = {
         std::min(static_cast<int>(std::get<0>(color) * light), static_cast<int>(std::get<3>(color))),
@@ -256,8 +256,8 @@ std::tuple<double, double, double, double> RayTracer::Scene::_applyLightOnPixel(
 void RayTracer::Scene::_renderThreading(std::size_t yStart, std::size_t nbStep)
 {
     std::vector<std::pair<RayTracer::IPrimitive *, std::vector<double>>> hitPrimitives;
-    std::tuple<double, double, double, double> color;
-    std::tuple<double, double, double, double> tmpColor;
+    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color;
+    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> tmpColor;
     std::size_t tmpOpacity;
     RayTracer::Ray ray;
     std::size_t i = 0;

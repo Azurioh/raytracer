@@ -17,14 +17,14 @@ namespace RayTracer
 {
     class GUI {
         public:
-            GUI(std::vector<std::vector<std::tuple<double, double, double, double>>> pixels);
+            GUI(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> pixels);
             ~GUI();
 
             Scene::CameraMovement render(void);
             bool isOpen(void) const;
             bool isNeedRefresh(void) const;
 
-            void refresh(std::vector<std::vector<std::tuple<double, double, double, double>>> pixels);
+            void refresh(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> pixels);
 
         private:
             std::unique_ptr<sf::RenderWindow> _window;
