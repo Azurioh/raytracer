@@ -21,11 +21,12 @@ namespace RayTracer
                 APrimitive(Math::Point3D center = Math::Point3D(0, 0, 0));
 
                 Math::Point3D getCenter(void) const;
-                std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> getColor(void) const;
+                std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> getColor(void) const;
+                void setColor(std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color);
 
             protected:
                 Math::Point3D _center;
-                std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> _color;
+                std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> _color;
         };
     }
 }

@@ -16,7 +16,12 @@ Math::Point3D RayTracer::Primitives::APrimitive::getCenter(void) const
 	return _center;
 }
 
-std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Primitives::APrimitive::getColor(void) const
+std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Primitives::APrimitive::getColor(void) const
 {
 	return _color;
+}
+
+void RayTracer::Primitives::APrimitive::setColor(std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color)
+{
+	_color = color;
 }
