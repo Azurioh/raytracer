@@ -22,7 +22,7 @@ namespace RayTracer
 
             virtual Math::Point3D getCenter(void) const = 0;
             virtual std::vector<double> hits(RayTracer::Ray const &ray) const = 0;
-            virtual std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> getColor(void) const = 0;
-            virtual void setColor(std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color) = 0;
+            virtual std::tuple<double, double, double, double> getColor(void) const = 0;
+            virtual void setColor(std::tuple<double, double, double, double> color) = 0;
     };
 }

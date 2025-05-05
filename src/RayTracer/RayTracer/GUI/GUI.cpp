@@ -9,7 +9,7 @@
 #include <iostream>
 #include "GUI.hh"
 
-RayTracer::GUI::GUI(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> pixels):
+RayTracer::GUI::GUI(std::vector<std::vector<std::tuple<double, double, double, double>>> pixels):
     _window(std::make_unique<sf::RenderWindow>(sf::VideoMode(pixels[0].size(), pixels.size()), "RayTracer GUI")),
     _image(std::make_unique<sf::Image>()), _texture(std::make_unique<sf::Texture>()), _sprite(std::make_unique<sf::Sprite>()), _needRefresh(true)
 {
@@ -52,7 +52,7 @@ bool RayTracer::GUI::isNeedRefresh(void) const
     return _needRefresh;
 }
 
-void RayTracer::GUI::refresh(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> pixels)
+void RayTracer::GUI::refresh(std::vector<std::vector<std::tuple<double, double, double, double>>> pixels)
 {
     sf::Color color;
 
