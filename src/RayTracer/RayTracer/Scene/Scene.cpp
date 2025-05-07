@@ -19,7 +19,7 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
     _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, -100), 100));
     _primitives.push_back(factory.createSphere(Math::Point3D(-300, 0, -100), 100));
     _primitives.push_back(factory.createSphere(Math::Point3D(300, 0, -100), 100));
-    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(1, -0.2, 1))));
+    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(-1, -1, -1), 0.8)));
 
     _primitives[0]->setHavingReflection(true);
     _primitives[0]->setReflectionIntensity(0.5);
@@ -230,7 +230,7 @@ std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Sc
         return primitive->getColor();
     }
 
-    lightDirection = _lights[0]->getDirection();
+    lightDirection = _lights[0]->getDirection() * -1;
     shadowRay = RayTracer::Ray(shadowOrigin, lightDirection);
     inShadow = _isInShadow(primitive, shadowRay);
 
