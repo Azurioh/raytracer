@@ -68,11 +68,10 @@ RayTracer::Ray RayTracer::Primitives::Flat::Sphere::getReflectionVector(RayTrace
     }
 
     Math::Point3D hitPoint = ray.getOrigin() + rayDir * t;
-    Math::Vector3D normal = hitPoint - _center;
-    normal.normalize();
+    Math::Vector3D normal = (hitPoint - _center) / (hitPoint - _center).length();
     double dot = rayDir.dot(normal);
 
-    Math::Vector3D reflectionDir = rayDir - normal * (2 * dot);
+    Math::Vector3D reflectionDir = rayDir - (normal * (2 * dot));
     if (reflectionDir.dot(normal) > 0) {
         reflectionDir *= -1;
     }
