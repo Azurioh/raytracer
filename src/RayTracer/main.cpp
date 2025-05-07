@@ -11,6 +11,8 @@
 
 std::int32_t main()
 {
-    RayTracer::Core().start();
+    RayTracer::Core core;
+
+    core.start();
     return 0;
 }
