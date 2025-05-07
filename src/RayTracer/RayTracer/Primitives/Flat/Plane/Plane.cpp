@@ -9,6 +9,8 @@
 #include "Math/Point3D/Point3D.hh"
 #include "Plane.hpp"
 
+#include <cmath>
+
 RayTracer::Primitives::Flat::Plane::Plane(Math::Point3D center, Math::Vector3D normal): APrimitive(center), _normal(normal)
 {
     _normal.normalize();

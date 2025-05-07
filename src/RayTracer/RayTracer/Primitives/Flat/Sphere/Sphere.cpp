@@ -8,6 +8,8 @@
 #include "Math/Vector3D/Vector3D.hh"
 #include "Sphere.hh"
 
+#include <cmath>
+
 RayTracer::Primitives::Flat::Sphere::Sphere(Math::Point3D center, double radius): APrimitive(center), _radius(radius)
 {
     _color = {0, 0, 255, 255};
