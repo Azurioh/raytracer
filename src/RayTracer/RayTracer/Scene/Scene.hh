@@ -10,8 +10,8 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include <tuple>
 #include <thread>
+#include <tuple>
 #include <mutex>
 
 #include "RayTracer/Camera/Camera.hh"
@@ -26,7 +26,6 @@ namespace RayTracer
     class Scene {
         public:
             Scene();
-            ~Scene();
 
             enum CameraMovement {
                 WINDOW_CLOSED,

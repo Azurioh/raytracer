@@ -7,9 +7,7 @@
 
 #include "APrimitive.hh"
 
-RayTracer::Primitives::APrimitive::APrimitive(Math::Point3D center): _center(center), _havingReflection(false), _reflectionIntensity(0)
-{
-}
+RayTracer::Primitives::APrimitive::APrimitive(Math::Point3D center): _center(center), _havingReflection(false), _reflectionIntensity(0) {}
 
 Math::Point3D RayTracer::Primitives::APrimitive::getCenter(void) const
 {

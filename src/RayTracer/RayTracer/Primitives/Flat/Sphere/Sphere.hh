@@ -7,10 +7,12 @@
 
 #pragma once
 
-#include <vector>
+#include "RayTracer/Primitives/APrimitive.hh"
+#include "Math/Vector3D/Vector3D.hh"
 #include "Math/Point3D/Point3D.hh"
 #include "RayTracer/Ray/Ray.hh"
-#include "RayTracer/Primitives/APrimitive.hh"
+
+#include <vector>
 
 namespace RayTracer
 {
@@ -24,8 +26,9 @@ namespace RayTracer
                     Sphere(Math::Point3D center = Math::Point3D(0, 0, 0), double radius = 0);
                     ~Sphere();
 
-                    std::vector<double> hits(RayTracer::Ray const& ray) const;
-                    RayTracer::Ray getReflectionVector(RayTracer::Ray const& ray) const;
+                    RayTracer::Ray getReflectionVector(RayTracer::Ray const& ray) const override;
+                    std::vector<double> hits(RayTracer::Ray const &ray) const override;
+                    Math::Vector3D getNormalAt(const Math::Point3D& hitPoint) const override;
 
                     void setRadius(double radius);
 

@@ -5,18 +5,15 @@
 ** Sphere
 */
 
-#include <cmath>
+#include "Math/Vector3D/Vector3D.hh"
 #include "Sphere.hh"
-#include "RayTracer/Primitives/IPrimitive.hh"
 
 RayTracer::Primitives::Flat::Sphere::Sphere(Math::Point3D center, double radius): APrimitive(center), _radius(radius)
 {
     _color = {0, 0, 255, 255};
 }
 
-RayTracer::Primitives::Flat::Sphere::~Sphere()
-{
-}
+RayTracer::Primitives::Flat::Sphere::~Sphere() {}
 
 std::vector<double> RayTracer::Primitives::Flat::Sphere::hits(RayTracer::Ray const &ray) const
 {
@@ -33,6 +30,14 @@ std::vector<double> RayTracer::Primitives::Flat::Sphere::hits(RayTracer::Ray con
         (-b + std::sqrt(discriminant)) / (2.0 * a),
         (-b - std::sqrt(discriminant)) / (2.0 * a),
     };
+}
+
+Math::Vector3D RayTracer::Primitives::Flat::Sphere::getNormalAt(const Math::Point3D& hitPoint) const
+{
+    Math::Vector3D normal = hitPoint - _center;
+
+    normal.normalize();
+    return normal;
 }
 
 void RayTracer::Primitives::Flat::Sphere::setRadius(double radius)

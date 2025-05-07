@@ -5,9 +5,9 @@
 ** Camera
 */
 
-#include "Camera.hh"
 #include "Math/Point3D/Point3D.hh"
 #include "Math/Vector3D/Vector3D.hh"
+#include "Camera.hh"
 
 RayTracer::Camera::Camera(): _origin(0, 0, 2500), _screenWidth(720), _screenHeight(920)
 {

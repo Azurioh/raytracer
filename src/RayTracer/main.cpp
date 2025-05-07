@@ -5,13 +5,12 @@
 ** Main.cpp
 */
 
-#include <cstdint>
 #include "RayTracer/Core/Core.hh"
+
+#include <cstdint>
 
 std::int32_t main()
 {
-    RayTracer::Core core;
-
-    core.start();
+    RayTracer::Core().start();
     return 0;
 }

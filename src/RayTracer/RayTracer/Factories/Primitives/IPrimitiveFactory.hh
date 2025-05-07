@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include <memory>
-
 #include "Math/Point3D/Point3D.hh"
+#include "Math/Vector3D/Vector3D.hh"
 #include "RayTracer/Primitives/IPrimitive.hh"
+
+#include <memory>
 
 namespace RayTracer
 {
@@ -24,6 +25,7 @@ namespace RayTracer
                     virtual ~IPrimitiveFactory() = default;
 
                     virtual std::unique_ptr<IPrimitive> createSphere(Math::Point3D origin, double radius) = 0;
+                    virtual std::unique_ptr<IPrimitive> createPlane(Math::Point3D origin, Math::Vector3D normal) = 0;
             };
         }
     }
