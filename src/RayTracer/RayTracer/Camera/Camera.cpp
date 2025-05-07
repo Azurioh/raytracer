@@ -9,9 +9,9 @@
 #include "Math/Point3D/Point3D.hh"
 #include "Math/Vector3D/Vector3D.hh"
 
-RayTracer::Camera::Camera(): _origin(0, 0, 1900), _screenWidth(720), _screenHeight(720)
+RayTracer::Camera::Camera(): _origin(0, 0, 2500), _screenWidth(720), _screenHeight(920)
 {
-    _screen.setOrigin(Math::Point3D(-(_screenWidth / 2), -(_screenHeight / 2), 0));
+    _screen.setOrigin(Math::Point3D(-(_screenWidth / 2), -(_screenHeight / 2), 1000));
     _screen.setBottomSide(Math::Vector3D(_screenWidth, 0, 0));
     _screen.setLeftSide(Math::Vector3D(0, _screenHeight, 0));
 }
