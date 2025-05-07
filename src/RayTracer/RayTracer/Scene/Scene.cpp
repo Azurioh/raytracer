@@ -17,9 +17,9 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
 
     _primitives.push_back(factory.createSphere(Math::Point3D(0, 500, -300), 300));
     _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, -100), 100));
-    _primitives.push_back(factory.createSphere(Math::Point3D(-400, 200, -100), 100));
-    _primitives.push_back(factory.createSphere(Math::Point3D(400, 200, -100), 100));
-    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(-1, -1, -1))));
+    _primitives.push_back(factory.createSphere(Math::Point3D(-300, 0, -100), 100));
+    _primitives.push_back(factory.createSphere(Math::Point3D(300, 0, -100), 100));
+    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(1, -0.2, 1))));
 
     _primitives[0]->setHavingReflection(true);
     _primitives[0]->setReflectionIntensity(0.5);
@@ -162,7 +162,7 @@ void RayTracer::Scene::exportToOutputFile(void)
     std::cout << "Image exported in the output.ppm file" << std::endl;
 }
 
-HitPrimitives RayTracer::Scene::_getHitPrimitive(RayTracer::Ray ray, RayTracer::IPrimitive *toExclude)
+HitPrimitives RayTracer::Scene::_getHitPrimitive(RayTracer::Ray ray)
 {
     HitPrimitives hitPrimitives;
     std::pair<RayTracer::IPrimitive *, std::vector<double>> tmp;
@@ -170,7 +170,7 @@ HitPrimitives RayTracer::Scene::_getHitPrimitive(RayTracer::Ray ray, RayTracer::
 
     for (auto it = _primitives.begin(); it != _primitives.end(); it++) {
         tValues = (*it)->hits(ray);
-        if (tValues.empty() || tValues.size() < 2 || it->get() == toExclude) {
+        if (tValues.empty() || tValues.size() < 2) {
             continue;
         }
         hitPrimitives.push_back({it->get(), tValues});
@@ -364,10 +364,10 @@ Color RayTracer::Scene::_handleReflectColor(HitPrimitives hitPrimitives, std::si
     }
     Color color = _handleFlatColor(hitPrimitives, index, ray);
     RayTracer::Ray reflectionRay = hitPrimitives[index].first->getReflectionVector(ray);
-    if (reflectionRay.getDirection() == Math::Vector3D()) {
+    if (reflectionRay == RayTracer::Ray()) {
         return {0, 0, 0, 255};
     }
-    HitPrimitives newHitPrimitives = _getHitPrimitive(reflectionRay, hitPrimitives[index].first);
+    HitPrimitives newHitPrimitives = _getHitPrimitive(reflectionRay);
     Color reflectionColor = {0, 0, 0, 255};
     if (!newHitPrimitives.empty() && depth < 5) {
         reflectionColor = _getPrimitiveColor(newHitPrimitives, 0, reflectionRay, depth + 1);

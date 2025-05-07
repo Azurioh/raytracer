@@ -61,7 +61,7 @@ namespace RayTracer
             double _diffuseFactor = 0;
             std::mutex _lock;
 
-            HitPrimitives _getHitPrimitive(RayTracer::Ray ray, RayTracer::IPrimitive *toExclude = nullptr);
+            HitPrimitives _getHitPrimitive(RayTracer::Ray ray);
             std::pair<RayTracer::IPrimitive *, double> _getClosestPrimitive(RayTracer::Ray ray);
             Color _getColor(RayTracer::IPrimitive *primitive, double determinant, RayTracer::Ray ray);
             bool _isInShadow(RayTracer::IPrimitive *primitive, RayTracer::Ray shadowRay);
