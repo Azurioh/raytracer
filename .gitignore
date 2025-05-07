@@ -36,6 +36,7 @@ binary
 # Local files
 temporary/
 .vscode/
+.cache/
 .DS_Store
 compile_commands.json
 *.log

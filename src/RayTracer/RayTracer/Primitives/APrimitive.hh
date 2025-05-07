@@ -7,10 +7,12 @@
 
 #pragma once
 
+#include "RayTracer/Primitives/IPrimitive.hh"
+#include "Math/Vector3D/Vector3D.hh"
+#include "Math/Point3D/Point3D.hh"
+
 #include <cstdint>
 #include <tuple>
-#include "Math/Point3D/Point3D.hh"
-#include "RayTracer/Primitives/IPrimitive.hh"
 
 namespace RayTracer
 {
@@ -22,11 +24,19 @@ namespace RayTracer
 
                 Math::Point3D getCenter(void) const;
                 std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> getColor(void) const;
+                bool isHavingReflection(void) const;
+                double getReflectionIntensity(void) const;
+
+                void setCenter(Math::Point3D center);
                 void setColor(std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color);
+                void setHavingReflection(bool havingReflection);
+                void setReflectionIntensity(double reflectionIntensity);
 
             protected:
                 Math::Point3D _center;
                 std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> _color;
+                bool _havingReflection;
+                double _reflectionIntensity;
         };
     }
 }
