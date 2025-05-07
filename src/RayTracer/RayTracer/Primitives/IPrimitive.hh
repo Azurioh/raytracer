@@ -11,6 +11,7 @@
 #include <vector>
 #include <tuple>
 #include "Math/Point3D/Point3D.hh"
+#include "Math/Vector3D/Vector3D.hh"
 #include "RayTracer/Ray/Ray.hh"
 
 namespace RayTracer
@@ -32,5 +33,6 @@ namespace RayTracer
 
             virtual std::vector<double> hits(RayTracer::Ray const& ray) const = 0;
             virtual RayTracer::Ray getReflectionVector(RayTracer::Ray const& ray) const = 0;
+            virtual Math::Vector3D getNormalAt(const Math::Point3D& hitPoint) const = 0;
     };
 }

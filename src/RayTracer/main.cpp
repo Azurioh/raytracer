@@ -5,8 +5,9 @@
 ** Main.cpp
 */
 
-#include <cstdint>
 #include "RayTracer/Core/Core.hh"
+
+#include <cstdint>
 
 std::int32_t main()
 {

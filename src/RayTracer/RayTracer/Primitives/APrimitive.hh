@@ -7,10 +7,12 @@
 
 #pragma once
 
+#include "RayTracer/Primitives/IPrimitive.hh"
+#include "Math/Vector3D/Vector3D.hh"
+#include "Math/Point3D/Point3D.hh"
+
 #include <cstdint>
 #include <tuple>
-#include "Math/Point3D/Point3D.hh"
-#include "RayTracer/Primitives/IPrimitive.hh"
 
 namespace RayTracer
 {

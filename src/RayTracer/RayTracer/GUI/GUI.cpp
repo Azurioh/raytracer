@@ -5,9 +5,9 @@
 ** GUI
 */
 
-#include <cstddef>
-#include <iostream>
 #include "GUI.hh"
+
+#include <cstddef>
 
 RayTracer::GUI::GUI(std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> pixels):
     _window(std::make_unique<sf::RenderWindow>(sf::VideoMode(pixels[0].size(), pixels.size()), "RayTracer GUI")),

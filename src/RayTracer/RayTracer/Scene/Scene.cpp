@@ -5,33 +5,36 @@
 ** Scene
 */
 
+#include "RayTracer/Factories/Primitives/FlatFactory/FlatFactory.hh"
+#include "Math/Vector3D/Vector3D.hh"
+#include "Scene.hh"
+
 #include <iostream>
 #include <fstream>
-#include "Scene.hh"
-#include "RayTracer/Primitives/Flat/Sphere/Sphere.hh"
-#include "RayTracer/Factories/Primitives/FlatFactory/FlatFactory.hh"
 
-RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambientFactor(0.2), _diffuseFactor(0)
+RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambientFactor(0.2), _diffuseFactor(1.0)
 {
     Factories::Primitive::FlatFactory factory;
 
-    _primitives.push_back(factory.createSphere(Math::Point3D(0, 500, -300), 300));
-    _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, -100), 100));
-    _primitives.push_back(factory.createSphere(Math::Point3D(-300, 0, -100), 100));
-    _primitives.push_back(factory.createSphere(Math::Point3D(300, 0, -100), 100));
-    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(-1, -1, -1), 0.8)));
+    _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, 0), 100));
+    _primitives.push_back(factory.createSphere(Math::Point3D(-150, 50, -100), 50));
+    _primitives.push_back(factory.createSphere(Math::Point3D(150, 50, -100), 50));
 
-    _primitives[0]->setHavingReflection(true);
-    _primitives[0]->setReflectionIntensity(0.5);
-    _primitives[1]->setColor({255, 0, 0, 255});
-    _primitives[2]->setColor({0, 255, 0, 255});
-    _primitives[3]->setColor({255, 255, 0, 255});
+    _primitives.push_back(factory.createPlane(Math::Point3D(0, 100, 0), Math::Vector3D(0, -1, 0)));
+
+    Math::Vector3D lightDir(-1, 1, -1);
+    lightDir.normalize();
+    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(lightDir, 1.0)));
+
+    _primitives[0]->setColor({255, 0, 0, 255});
+    _primitives[1]->setColor({0, 255, 0, 255});
+    _primitives[2]->setColor({0, 0, 255, 255});
+
+    _primitives[3]->setColor({240, 240, 240, 255});
+    _primitives[3]->setHavingReflection(true);
+    _primitives[3]->setReflectionIntensity(0.5);
+
     makeRender();
-    exportToOutputFile();
-}
-
-RayTracer::Scene::~Scene()
-{
 }
 
 std::vector<std::vector<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>> RayTracer::Scene::getPixels(void) const
@@ -215,7 +218,7 @@ std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Sc
     }
 
     Math::Vector3D hitPosition = (ray.getDirection() * determinant) + ray.getOrigin();
-    Math::Vector3D normal = hitPosition - primitive->getCenter();
+    Math::Vector3D normal = primitive->getNormalAt(hitPosition);
     Math::Vector3D lightDirection;
     Math::Point3D shadowOrigin;
     RayTracer::Ray shadowRay;
@@ -223,7 +226,6 @@ std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Sc
     double diffuseFactor = _diffuseFactor;
     bool inShadow;
 
-    normal.normalize();
     shadowOrigin = hitPosition + normal * 1e-4;
 
     if (_lights.empty()) {
