@@ -24,6 +24,8 @@ namespace RayTracer
             void setOrigin(const Math::Point3D& origin);
             void setDirection(const Math::Vector3D& direction);
 
+            bool operator==(const RayTracer::Ray& ray) const;
+
         private:
             Math::Point3D _origin;
             Math::Vector3D _direction;

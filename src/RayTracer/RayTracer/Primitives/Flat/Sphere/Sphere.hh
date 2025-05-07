@@ -24,7 +24,8 @@ namespace RayTracer
                     Sphere(Math::Point3D center = Math::Point3D(0, 0, 0), double radius = 0);
                     ~Sphere();
 
-                    std::vector<double> hits(RayTracer::Ray const &ray) const;
+                    std::vector<double> hits(RayTracer::Ray const& ray) const;
+                    RayTracer::Ray getReflectionVector(RayTracer::Ray const& ray) const;
 
                     void setRadius(double radius);
 

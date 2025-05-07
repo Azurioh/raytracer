@@ -15,12 +15,17 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
 {
     Factories::Primitive::FlatFactory factory;
 
-    _primitives.push_back(factory.createSphere(Math::Point3D(100, 100, 100), 50));
-    _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, -400), 25));
-    _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, 0), 100));
-    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(1, 1, 1))));
+    _primitives.push_back(factory.createSphere(Math::Point3D(0, 500, -300), 300));
+    _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, -100), 100));
+    _primitives.push_back(factory.createSphere(Math::Point3D(-300, 0, -100), 100));
+    _primitives.push_back(factory.createSphere(Math::Point3D(300, 0, -100), 100));
+    _lights.push_back(std::unique_ptr<RayTracer::Light>(new RayTracer::Light(Math::Vector3D(-1, -1, -1), 0.8)));
 
+    _primitives[0]->setHavingReflection(true);
+    _primitives[0]->setReflectionIntensity(0.5);
     _primitives[1]->setColor({255, 0, 0, 255});
+    _primitives[2]->setColor({0, 255, 0, 255});
+    _primitives[3]->setColor({255, 255, 0, 255});
     makeRender();
     exportToOutputFile();
 }
@@ -113,23 +118,25 @@ void RayTracer::Scene::makeRender(void)
     std::size_t nbLines = _camera->getScreenHeight();
     std::size_t nbCols = _camera->getScreenWidth();
     std::vector<std::thread> threads;
-    unsigned int i = 0;
 
     _pixels.resize(nbLines);
-    for (double i = 0; i < nbLines; i++) {
+    for (std::size_t i = 0; i < nbLines; i++) {
         _pixels[i].resize(nbCols);
     }
 
-    for (i = 0; i < nbThreads - 1; i++) {
-        threads.push_back(std::thread(&RayTracer::Scene::_renderThreading, this, i * (nbLines / nbThreads), (nbLines / nbThreads)));
+    std::size_t linesPerThread = nbLines / nbThreads;
+    std::size_t remainingLines = nbLines % nbThreads;
+
+    for (std::size_t i = 0; i < nbThreads; i++) {
+        std::size_t startLine = i * linesPerThread + std::min(i, remainingLines);
+        std::size_t linesToProcess = linesPerThread + (i < remainingLines ? 1 : 0);
+        threads.emplace_back(&RayTracer::Scene::_renderThreading, this, startLine, linesToProcess);
     }
-    if (nbLines % nbThreads != 0) {
-        threads.push_back(std::thread(&RayTracer::Scene::_renderThreading, this, i * (nbLines / nbThreads), (nbLines / nbThreads) + (nbLines % nbThreads)));
-    } else {
-        threads.push_back(std::thread(&RayTracer::Scene::_renderThreading, this, i * (nbLines / nbThreads), (nbLines / nbThreads)));
-    }
-    for (std::size_t i = 0; i < threads.size(); i++) {
-        threads[i].join();
+
+    for (auto& thread : threads) {
+        if (thread.joinable()) {
+            thread.join();
+        }
     }
 }
 
@@ -155,25 +162,30 @@ void RayTracer::Scene::exportToOutputFile(void)
     std::cout << "Image exported in the output.ppm file" << std::endl;
 }
 
-std::vector<std::pair<RayTracer::IPrimitive *, std::vector<double>>> RayTracer::Scene::_getHitPrimitive(RayTracer::Ray ray)
+HitPrimitives RayTracer::Scene::_getHitPrimitive(RayTracer::Ray ray)
 {
-    std::vector<std::pair<RayTracer::IPrimitive *, std::vector<double>>> hitPrimitives;
+    HitPrimitives hitPrimitives;
     std::pair<RayTracer::IPrimitive *, std::vector<double>> tmp;
     std::vector<double> tValues;
 
     for (auto it = _primitives.begin(); it != _primitives.end(); it++) {
         tValues = (*it)->hits(ray);
-        if (tValues.empty()) {
+        if (tValues.empty() || tValues.size() < 2) {
             continue;
         }
         hitPrimitives.push_back({it->get(), tValues});
     }
-    for (int i = 0; static_cast<std::size_t>(i + 1) < hitPrimitives.size(); i++) {
-        if (hitPrimitives[i].second[1] > hitPrimitives[i + 1].second[1]) {
-            tmp = hitPrimitives[i];
-            hitPrimitives[i] = hitPrimitives[i + 1];
-            hitPrimitives[i + 1] = tmp;
-            i = -1;
+    if (!hitPrimitives.empty()) {
+        for (int i = 0; static_cast<std::size_t>(i + 1) < hitPrimitives.size(); i++) {
+            if (hitPrimitives[i].second.size() < 2 || hitPrimitives[i + 1].second.size() < 2) {
+                continue;
+            }
+            if (hitPrimitives[i].second[1] > hitPrimitives[i + 1].second[1]) {
+                tmp = hitPrimitives[i];
+                hitPrimitives[i] = hitPrimitives[i + 1];
+                hitPrimitives[i + 1] = tmp;
+                i = -1;
+            }
         }
     }
     return hitPrimitives;
@@ -198,6 +210,10 @@ std::pair<RayTracer::IPrimitive *, double> RayTracer::Scene::_getClosestPrimitiv
 
 std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Scene::_getColor(RayTracer::IPrimitive *primitive, double determinant, RayTracer::Ray ray)
 {
+    if (primitive == nullptr) {
+        return {0, 0, 0, 255};
+    }
+
     Math::Vector3D hitPosition = (ray.getDirection() * determinant) + ray.getOrigin();
     Math::Vector3D normal = hitPosition - primitive->getCenter();
     Math::Vector3D lightDirection;
@@ -209,7 +225,12 @@ std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> RayTracer::Sc
 
     normal.normalize();
     shadowOrigin = hitPosition + normal * 1e-4;
-    lightDirection = _lights[0]->getDirection();
+
+    if (_lights.empty()) {
+        return primitive->getColor();
+    }
+
+    lightDirection = _lights[0]->getDirection() * -1;
     shadowRay = RayTracer::Ray(shadowOrigin, lightDirection);
     inShadow = _isInShadow(primitive, shadowRay);
 
@@ -257,10 +278,7 @@ void RayTracer::Scene::_renderThreading(std::size_t yStart, std::size_t nbStep)
 {
     std::vector<std::pair<RayTracer::IPrimitive *, std::vector<double>>> hitPrimitives;
     std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> color;
-    std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t> tmpColor;
-    std::size_t tmpOpacity;
     RayTracer::Ray ray;
-    std::size_t i = 0;
     double u;
     double v;
     double yAxis = _camera->getScreenHeight();
@@ -274,29 +292,93 @@ void RayTracer::Scene::_renderThreading(std::size_t yStart, std::size_t nbStep)
 
             hitPrimitives = _getHitPrimitive(ray);
             if (hitPrimitives.empty()) {
+                std::lock_guard<std::mutex> lock(_pixelsMutex);
                 _pixels[y][x] = {0, 0, 0, 255};
                 continue;
             }
 
-            tmpColor = _getColor(hitPrimitives[0].first, hitPrimitives[0].second[1], ray);
-            i = 1;
-            color = tmpColor;
-            if (std::get<3>(tmpColor) < 255) {
-                while (std::get<3>(color) < 255 && i < hitPrimitives.size()) {
-                    tmpColor = _getColor(hitPrimitives[i].first, hitPrimitives[i].second[1], ray);
-                    tmpOpacity = std::get<3>(tmpColor);
-                    double remainingOpacity = (255 - std::get<3>(color)) / 255.0;
-                    color = {
-                        std::get<0>(color) + (std::get<0>(tmpColor) * remainingOpacity),
-                        std::get<1>(color) + (std::get<1>(tmpColor) * remainingOpacity),
-                        std::get<2>(color) + (std::get<2>(tmpColor) * remainingOpacity),
-                        std::min(255.0, std::get<3>(color) + static_cast<double>(tmpOpacity))
-                    };
-                    i++;
-                }
-            }
+            color = _getPrimitiveColor(hitPrimitives, 0, ray);
+            std::lock_guard<std::mutex> lock(_pixelsMutex);
             _pixels[y][x] = color;
         }
     }
-    return;
+}
+
+Color RayTracer::Scene::_getPrimitiveColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray, std::size_t depth)
+{
+    if (hitPrimitives.empty() || index >= hitPrimitives.size() ||
+        hitPrimitives[index].first == nullptr) {
+        return {0, 0, 0, 255};
+    }
+    if (hitPrimitives[index].first->isHavingReflection() && depth < 5) {
+        return _handleReflectColor(hitPrimitives, index, ray, depth);
+    } else {
+        return _handleFlatColor(hitPrimitives, index, ray);
+    }
+}
+
+Color RayTracer::Scene::_handleFlatColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray)
+{
+    if (hitPrimitives.empty() || index >= hitPrimitives.size() ||
+        hitPrimitives[index].first == nullptr ||
+        hitPrimitives[index].second.size() < 2) {
+        return {0, 0, 0, 255};
+    }
+
+    Color tmpColor = _getColor(hitPrimitives[index].first, hitPrimitives[index].second[1], ray);
+    Color color = tmpColor;
+    double remainingOpacity;
+
+    std::size_t currentIndex = index + 1;
+
+    if (std::get<3>(tmpColor) < 255) {
+        int maxIterations = 10;
+        int iterations = 0;
+
+        while (std::get<3>(color) < 255 && currentIndex < hitPrimitives.size() && iterations < maxIterations) {
+            if (currentIndex >= hitPrimitives.size() || hitPrimitives[currentIndex].first == nullptr || hitPrimitives[currentIndex].second.size() < 2) {
+                continue;
+            }
+
+            tmpColor = _getPrimitiveColor(hitPrimitives, currentIndex, ray);
+            remainingOpacity = static_cast<double>(255.0 - std::get<3>(color)) / 255.0;
+            color = {
+                std::get<0>(color) + (std::get<0>(tmpColor) * remainingOpacity),
+                std::get<1>(color) + (std::get<1>(tmpColor) * remainingOpacity),
+                std::get<2>(color) + (std::get<2>(tmpColor) * remainingOpacity),
+                std::min(255.0, std::get<3>(color) + static_cast<double>(std::get<3>(tmpColor)))
+            };
+
+            currentIndex++;
+            iterations++;
+        }
+    }
+
+    return color;
+}
+
+Color RayTracer::Scene::_handleReflectColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray, std::size_t depth)
+{
+    if (hitPrimitives.empty() || index >= hitPrimitives.size() || hitPrimitives[index].first == nullptr || depth >= 5) {
+        return {0, 0, 0, 255};
+    }
+    Color color = _handleFlatColor(hitPrimitives, index, ray);
+    RayTracer::Ray reflectionRay = hitPrimitives[index].first->getReflectionVector(ray);
+    if (reflectionRay == RayTracer::Ray()) {
+        return {0, 0, 0, 255};
+    }
+    HitPrimitives newHitPrimitives = _getHitPrimitive(reflectionRay);
+    Color reflectionColor = {0, 0, 0, 255};
+    if (!newHitPrimitives.empty() && depth < 5) {
+        reflectionColor = _getPrimitiveColor(newHitPrimitives, 0, reflectionRay, depth + 1);
+    }
+    double reflectionIntensity = hitPrimitives[index].first->getReflectionIntensity();
+
+    Color newColor ={
+        static_cast<uint8_t>((1 - reflectionIntensity) * std::get<0>(color) + (reflectionIntensity * std::get<0>(reflectionColor))),
+        static_cast<uint8_t>((1 - reflectionIntensity) * std::get<1>(color) + (reflectionIntensity * std::get<1>(reflectionColor))),
+        static_cast<uint8_t>((1 - reflectionIntensity) * std::get<2>(color) + (reflectionIntensity * std::get<2>(reflectionColor))),
+        std::get<3>(color)
+    };
+    return newColor;
 }

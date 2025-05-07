@@ -30,3 +30,8 @@ void RayTracer::Ray::setDirection(const Math::Vector3D& direction)
 {
 	_direction = direction;
 }
+
+bool RayTracer::Ray::operator==(const RayTracer::Ray& ray) const
+{
+	return (_origin == ray.getOrigin() && _direction == ray.getDirection());
+}
