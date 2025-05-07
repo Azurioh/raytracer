@@ -24,7 +24,7 @@ void RayTracer::Parser::parseLights(libconfig::Setting& root)
 
     if (lights.exists("point")) {
         const libconfig::Setting& pointList = lights["point"];
-        for (int i = 0; i < pointList.getLength(); ++i) {
+        for (int i = 0; i < pointList.getLength(); i++) {
             const libconfig::Setting& light = pointList[i];
             light.lookupValue("x", std::get<0>(vector));
             light.lookupValue("y", std::get<1>(vector));
@@ -34,7 +34,7 @@ void RayTracer::Parser::parseLights(libconfig::Setting& root)
     }
     if (lights.exists("directional")) {
         const libconfig::Setting& directionalList = lights["directional"];
-        for (int i = 0; i < directionalList.getLength(); ++i) {
+        for (int i = 0; i < directionalList.getLength(); i++) {
             const libconfig::Setting& light = directionalList[i];
             light.lookupValue("x", std::get<0>(vector));
             light.lookupValue("y", std::get<1>(vector));
@@ -42,13 +42,46 @@ void RayTracer::Parser::parseLights(libconfig::Setting& root)
             _directionals.push_back(vector);
         }
     }
-
+    return;
 }
 
-void RayTracer::Parser::parseCameras()
+void RayTracer::Parser::parseCameras(libconfig::Setting& root)
 {
+    const libconfig::Setting& cameras = root["cameras"];
+    std::tuple<std::tuple<int, int>, std::tuple<int, int, int>, std::tuple<int, int, int>, int> camera;
+    std::tuple<int, int> resolution;
+    std::tuple<int, int, int> position;
+    std::tuple<int, int, int> rotation;
+    float fov;
 
+    if (cameras.exists("cameras")) {
+        const libconfig::Setting& camerasList = cameras["cameras"];
+        for (int i = 0; i < camerasList.getLength(); i++) {
+            const libconfig::Setting& camera = camerasList[i];
+
+            const libconfig::Setting& res = camera["resolution"];
+            res.lookupValue("width", std::get<0>(resolution));
+            res.lookupValue("height", std::get<1>(resolution));
+
+            const libconfig::Setting& pos = camera["position"];
+            pos.lookupValue("x", std::get<0>(position));
+            pos.lookupValue("y", std::get<1>(position));
+            pos.lookupValue("z", std::get<2>(position));
+
+            const libconfig::Setting& rot = camera["rotation"];
+            rot.lookupValue("x", std::get<0>(rotation));
+            rot.lookupValue("y", std::get<1>(rotation));
+            rot.lookupValue("z", std::get<2>(rotation));
+
+            camera.lookupValue("fieldOfView", fov);
+
+            _camera.push_back(std::make_tuple(resolution, position, rotation, fov));
+        }
+    }
+    return;
 }
+
+
 
 void RayTracer::Parser::parseFile(std::string filePath)
 {
@@ -58,7 +91,16 @@ void RayTracer::Parser::parseFile(std::string filePath)
     cfg.readFile(filePath);
     libconfig::Setting& root = cfg.getRoot();
 
+    parseCameras(root);
     parseLights(root);
+
+    // std::cout << "cameras" << std::endl;
+    // for (auto i : _camera){
+    //     std::cout << "resolution " << std::get<0>(std::get<0>(i)) << " " << std::get<1>(std::get<0>(i)) << std::endl;
+    //     std::cout << "position " << std::get<0>(std::get<1>(i)) << " " << std::get<1>(std::get<1>(i)) <<  " " << std::get<2>(std::get<1>(i)) << std::endl;
+    //     std::cout << "rotation " << std::get<0>(std::get<2>(i)) << " " << std::get<1>(std::get<2>(i)) <<  " " << std::get<2>(std::get<2>(i)) << std::endl;
+    //     std::cout << "fov " << std::get<3>(i) << std::endl << std::endl;
+    // }
     // std::cout << "ambient light " << _ambient_light << std::endl;
     // std::cout << "diffuse_light " << _diffuse_light << std::endl << std::endl;
     // std::cout << "light points" << std::endl;

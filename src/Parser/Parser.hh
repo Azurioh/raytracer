@@ -20,14 +20,14 @@ namespace RayTracer{
             ~Parser();
             void parseFile(std::string filePath);
             void parseLights(libconfig::Setting& root);
-            void parseCameras();
+            void parseCameras(libconfig::Setting& root);
 
         protected:
         private:
-            std::vector<std::tuple<std::tuple<int, int>, std::tuple<int, int, int>, std::tuple<int, int, int>, int>> _camera;
-            float _ambient_light;
-            float _diffuse_light;
-            std::vector<std::tuple<int, int, int>> _points;
-            std::vector<std::tuple<int, int, int>> _directionals;
+            std::vector<std::tuple<std::tuple<double, double>, std::tuple<double, double, double>, std::tuple<double, double, double>, double>> _camera;
+            double _ambient_light;
+            double _diffuse_light;
+            std::vector<std::tuple<double, double, double>> _points;
+            std::vector<std::tuple<double, double, double>> _directionals;
     };
 }
