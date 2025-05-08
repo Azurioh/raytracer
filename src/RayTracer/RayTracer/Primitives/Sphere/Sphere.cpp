@@ -9,15 +9,16 @@
 #include "Sphere.hh"
 
 #include <cmath>
+#include <iostream>
 
-RayTracer::Primitives::Flat::Sphere::Sphere(Math::Point3D center, double radius): APrimitive(center), _radius(radius)
+RayTracer::Primitives::Sphere::Sphere(Math::Point3D center, double radius): APrimitive(center), _radius(radius)
 {
     _color = {0, 0, 255, 255};
 }
 
-RayTracer::Primitives::Flat::Sphere::~Sphere() {}
+RayTracer::Primitives::Sphere::~Sphere() {}
 
-std::vector<double> RayTracer::Primitives::Flat::Sphere::hits(RayTracer::Ray const &ray) const
+std::vector<double> RayTracer::Primitives::Sphere::hits(RayTracer::Ray const &ray) const
 {
     Math::Vector3D oc = ray.getOrigin() - _center;
     double a = ray.getDirection().dot(ray.getDirection());
@@ -25,8 +26,9 @@ std::vector<double> RayTracer::Primitives::Flat::Sphere::hits(RayTracer::Ray con
     double c = oc.dot(oc) - _radius * _radius;
     double discriminant = b * b - 4.0 * a * c;
 
-    if (discriminant < 0)
+    if (discriminant < 0) {
         return {};
+    }
 
     return {
         (-b + std::sqrt(discriminant)) / (2.0 * a),
@@ -34,7 +36,7 @@ std::vector<double> RayTracer::Primitives::Flat::Sphere::hits(RayTracer::Ray con
     };
 }
 
-Math::Vector3D RayTracer::Primitives::Flat::Sphere::getNormalAt(const Math::Point3D& hitPoint) const
+Math::Vector3D RayTracer::Primitives::Sphere::getNormalAt(const Math::Point3D& hitPoint) const
 {
     Math::Vector3D normal = hitPoint - _center;
 
@@ -42,12 +44,12 @@ Math::Vector3D RayTracer::Primitives::Flat::Sphere::getNormalAt(const Math::Poin
     return normal;
 }
 
-void RayTracer::Primitives::Flat::Sphere::setRadius(double radius)
+void RayTracer::Primitives::Sphere::setRadius(double radius)
 {
 	_radius = radius;
 }
 
-RayTracer::Ray RayTracer::Primitives::Flat::Sphere::getReflectionVector(RayTracer::Ray const& ray) const
+RayTracer::Ray RayTracer::Primitives::Sphere::getReflectionVector(RayTracer::Ray const& ray) const
 {
     Math::Vector3D rayDir = ray.getDirection();
     rayDir.normalize();

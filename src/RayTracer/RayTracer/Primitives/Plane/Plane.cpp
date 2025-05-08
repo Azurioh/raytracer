@@ -7,16 +7,16 @@
 
 #include "Math/Vector3D/Vector3D.hh"
 #include "Math/Point3D/Point3D.hh"
-#include "Plane.hpp"
+#include "Plane.hh"
 
 #include <cmath>
 
-RayTracer::Primitives::Flat::Plane::Plane(Math::Point3D center, Math::Vector3D normal): APrimitive(center), _normal(normal)
+RayTracer::Primitives::Plane::Plane(Math::Point3D center, Math::Vector3D normal): APrimitive(center), _normal(normal)
 {
     _normal.normalize();
 }
 
-RayTracer::Ray RayTracer::Primitives::Flat::Plane::getReflectionVector(RayTracer::Ray const& ray) const
+RayTracer::Ray RayTracer::Primitives::Plane::getReflectionVector(RayTracer::Ray const& ray) const
 {
     double denom = _normal.dot(ray.getDirection());
 
@@ -53,7 +53,7 @@ RayTracer::Ray RayTracer::Primitives::Flat::Plane::getReflectionVector(RayTracer
     return reflectionRay;
 }
 
-std::vector<double> RayTracer::Primitives::Flat::Plane::hits(RayTracer::Ray const &ray) const
+std::vector<double> RayTracer::Primitives::Plane::hits(RayTracer::Ray const &ray) const
 {
     double denom = _normal.dot(ray.getDirection());
 
@@ -70,17 +70,17 @@ std::vector<double> RayTracer::Primitives::Flat::Plane::hits(RayTracer::Ray cons
     return {};
 }
 
-Math::Vector3D RayTracer::Primitives::Flat::Plane::getNormalAt(const Math::Point3D& hitPoint __attribute__((unused))) const
+Math::Vector3D RayTracer::Primitives::Plane::getNormalAt(const Math::Point3D& hitPoint __attribute__((unused))) const
 {
     return _normal;
 }
 
-Math::Vector3D RayTracer::Primitives::Flat::Plane::getNormal() const
+Math::Vector3D RayTracer::Primitives::Plane::getNormal() const
 {
     return _normal;
 }
 
-void RayTracer::Primitives::Flat::Plane::setNormal(const Math::Vector3D& normal)
+void RayTracer::Primitives::Plane::setNormal(const Math::Vector3D& normal)
 {
     _normal = normal;
     _normal.normalize();
