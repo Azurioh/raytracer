@@ -13,21 +13,28 @@
 
 #pragma once
 
+using Vector = std::tuple<double, double, double>;
+
 namespace RayTracer{
     class Parser {
         public:
             Parser();
             ~Parser();
             void parseFile(std::string filePath);
-            void parseLights(libconfig::Setting& root);
             void parseCameras(libconfig::Setting& root);
+            void parsePrimitives(libconfig::Setting& root);
+            void parseSpheres(libconfig::Setting& primitives);
+            void parsePlanes(libconfig::Setting& primitives);
+            void parseLights(libconfig::Setting& root);
 
         protected:
         private:
-            std::vector<std::tuple<std::tuple<double, double>, std::tuple<double, double, double>, std::tuple<double, double, double>, double>> _camera;
+            std::vector<std::tuple<std::tuple<double, double>, Vector, Vector, double>> _camera;
+            std::vector<std::tuple<Vector, double, Vector>> _spheres;
+            std::vector<std::tuple<std::string, double, Vector>> _planes;
             double _ambient_light;
             double _diffuse_light;
-            std::vector<std::tuple<double, double, double>> _points;
-            std::vector<std::tuple<double, double, double>> _directionals;
+            std::vector<Vector> _points;
+            std::vector<Vector> _directionals;
     };
 }

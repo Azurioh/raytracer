@@ -48,11 +48,10 @@ void RayTracer::Parser::parseLights(libconfig::Setting& root)
 void RayTracer::Parser::parseCameras(libconfig::Setting& root)
 {
     const libconfig::Setting& cameras = root["cameras"];
-    std::tuple<std::tuple<int, int>, std::tuple<int, int, int>, std::tuple<int, int, int>, int> camera;
     std::tuple<int, int> resolution;
     std::tuple<int, int, int> position;
     std::tuple<int, int, int> rotation;
-    float fov;
+    int fov;
 
     if (cameras.exists("cameras")) {
         const libconfig::Setting& camerasList = cameras["cameras"];
@@ -74,14 +73,65 @@ void RayTracer::Parser::parseCameras(libconfig::Setting& root)
             rot.lookupValue("z", std::get<2>(rotation));
 
             camera.lookupValue("fieldOfView", fov);
-
             _camera.push_back(std::make_tuple(resolution, position, rotation, fov));
         }
     }
     return;
 }
 
+void RayTracer::Parser::parseSpheres(libconfig::Setting& primitives)
+{
+    libconfig::Setting& spheresList = primitives["spheres"];
+    std::tuple<int, int, int> position;
+    int radius;
+    std::tuple<int, int, int> color;
 
+    for (int i = 0; i < spheresList.getLength(); i++) {
+        const libconfig::Setting& sphere = spheresList[i];
+        sphere.lookupValue("x", std::get<0>(position));
+        sphere.lookupValue("y", std::get<1>(position));
+        sphere.lookupValue("z", std::get<2>(position));
+        sphere.lookupValue("r", radius);
+        const libconfig::Setting& col = sphere["color"];
+        col.lookupValue("r", std::get<0>(color));
+        col.lookupValue("g", std::get<1>(color));
+        col.lookupValue("b", std::get<2>(color));
+        _spheres.push_back(std::make_tuple(position, radius, color));
+    }
+    return;
+}
+
+void RayTracer::Parser::parsePlanes(libconfig::Setting& primitives)
+{
+    libconfig::Setting& planesList = primitives["planes"];
+    std::string axis;
+    int position;
+    std::tuple<int, int, int> color;
+
+    for (int i = 0; i < planesList.getLength(); i++) {
+        const libconfig::Setting& plane = planesList[i];
+        plane.lookupValue("axis", axis);
+        plane.lookupValue("position", position);
+        const libconfig::Setting& col = plane["color"];
+        col.lookupValue("r", std::get<0>(color));
+        col.lookupValue("g", std::get<1>(color));
+        col.lookupValue("b", std::get<2>(color));
+        _planes.push_back(std::make_tuple(axis, position, color));
+    }
+    return;
+}
+
+void RayTracer::Parser::parsePrimitives(libconfig::Setting& root)
+{
+    libconfig::Setting& primitives = root["primitives"];
+
+    if (primitives.exists("spheres")){
+        parseSpheres(primitives);
+    }
+    if (primitives.exists("planes")){
+        parsePlanes(primitives);
+    }
+}
 
 void RayTracer::Parser::parseFile(std::string filePath)
 {
@@ -92,23 +142,6 @@ void RayTracer::Parser::parseFile(std::string filePath)
     libconfig::Setting& root = cfg.getRoot();
 
     parseCameras(root);
+    parsePrimitives(root);
     parseLights(root);
-
-    // std::cout << "cameras" << std::endl;
-    // for (auto i : _camera){
-    //     std::cout << "resolution " << std::get<0>(std::get<0>(i)) << " " << std::get<1>(std::get<0>(i)) << std::endl;
-    //     std::cout << "position " << std::get<0>(std::get<1>(i)) << " " << std::get<1>(std::get<1>(i)) <<  " " << std::get<2>(std::get<1>(i)) << std::endl;
-    //     std::cout << "rotation " << std::get<0>(std::get<2>(i)) << " " << std::get<1>(std::get<2>(i)) <<  " " << std::get<2>(std::get<2>(i)) << std::endl;
-    //     std::cout << "fov " << std::get<3>(i) << std::endl << std::endl;
-    // }
-    // std::cout << "ambient light " << _ambient_light << std::endl;
-    // std::cout << "diffuse_light " << _diffuse_light << std::endl << std::endl;
-    // std::cout << "light points" << std::endl;
-    // for (auto i : _points){
-    //     std::cout << std::get<0>(i) << " " << std::get<1>(i) << " " << std::get<2>(i) << std::endl;
-    // }
-    // std::cout << std::endl << "directionals lights" << std::endl;
-    // for (auto i : _directionals){
-    //     std::cout << std::get<0>(i) << " " << std::get<1>(i) << " " << std::get<2>(i) << std::endl;
-    // }
 }
