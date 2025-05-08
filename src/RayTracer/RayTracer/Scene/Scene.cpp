@@ -5,7 +5,9 @@
 ** Scene
 */
 
-#include "RayTracer/Factories/Primitives/FlatFactory/FlatFactory.hh"
+#include "RayTracer/Builders/Director/Director.hpp"
+#include "RayTracer/Builders/Plane/PlaneBuilder.hh"
+#include "RayTracer/Builders/Sphere/SphereBuilder.hh"
 #include "Math/Vector3D/Vector3D.hh"
 #include "Scene.hh"
 
@@ -14,13 +16,46 @@
 
 RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambientFactor(0.2), _diffuseFactor(1.0)
 {
-    Factories::Primitive::FlatFactory factory;
+    Builders::Director director;
+    Builders::SphereBuilder sphereBuilder;
+    Builders::PlaneBuilder planeBuilder;
 
-    _primitives.push_back(factory.createSphere(Math::Point3D(0, 0, 0), 100));
-    _primitives.push_back(factory.createSphere(Math::Point3D(-150, 50, -100), 50));
-    _primitives.push_back(factory.createSphere(Math::Point3D(150, 50, -100), 50));
-
-    _primitives.push_back(factory.createPlane(Math::Point3D(0, 100, 0), Math::Vector3D(0, -1, 0)));
+    director.makePrimitive<Primitives::Sphere>(sphereBuilder,
+        Math::Point3D(0, 0, 0),
+        {255, 0, 0, 255},
+        {false, 0.0},
+        {false, 0.0},
+        Math::Vector3D(0, 0, 0),
+        100.0
+    );
+    _primitives.push_back(std::move(sphereBuilder.getPrimitive()));
+    director.makePrimitive<Primitives::Sphere>(sphereBuilder,
+        Math::Point3D(-150, 50, -100),
+        {0, 255, 0, 255},
+        {false, 0.0},
+        {false, 0.0},
+        Math::Vector3D(0, 0, 0),
+        50.0
+    );
+    _primitives.push_back(std::move(sphereBuilder.getPrimitive()));
+    director.makePrimitive<Primitives::Sphere>(sphereBuilder,
+        Math::Point3D(150, 50, -100),
+        {0, 0, 255, 255},
+        {false, 0.0},
+        {false, 0.0},
+        Math::Vector3D(0, 0, 0),
+        50.0
+    );
+    _primitives.push_back(std::move(sphereBuilder.getPrimitive()));
+    director.makePrimitive<Primitives::Plane>(planeBuilder,
+        Math::Point3D(0, 100, 0),
+        {240, 240, 240, 255},
+        {true, 0.5},
+        {false, 0.0},
+        Math::Vector3D(0, 0, 0),
+        Math::Vector3D(0, -1, 0)
+    );
+    _primitives.push_back(std::move(planeBuilder.getPrimitive()));
 
     Math::Vector3D lightDir(-1, 1, -1);
     lightDir.normalize();
