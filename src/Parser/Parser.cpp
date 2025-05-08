@@ -131,7 +131,6 @@ void RayTracer::Parser::parsePrimitives(libconfig::Setting& root)
     if (primitives.exists("planes")){
         parsePlanes(primitives);
     }
-    return;
 }
 
 void RayTracer::Parser::parseFile(std::string filePath)
@@ -139,7 +138,8 @@ void RayTracer::Parser::parseFile(std::string filePath)
     std::string folderPath = "Scenes/";
     filePath = folderPath + filePath;
     libconfig::Config cfg;
-    cfg.readFile(filePath);
+    const char *path = filePath.c_str();
+    cfg.readFile(path);
     libconfig::Setting& root = cfg.getRoot();
 
     parseCameras(root);
