@@ -131,6 +131,7 @@ void RayTracer::Parser::parsePrimitives(libconfig::Setting& root)
     if (primitives.exists("planes")){
         parsePlanes(primitives);
     }
+    return;
 }
 
 void RayTracer::Parser::parseFile(std::string filePath)
@@ -144,4 +145,5 @@ void RayTracer::Parser::parseFile(std::string filePath)
     parseCameras(root);
     parsePrimitives(root);
     parseLights(root);
+    return;
 }
