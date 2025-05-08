@@ -11,6 +11,8 @@
 #include "Math/Vector3D/Vector3D.hh"
 #include <cstdarg>
 #include <memory>
+#include <tuple>
+#include <cstdint>
 
 using Color = std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>;
 
