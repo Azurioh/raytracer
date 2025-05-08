@@ -14,7 +14,7 @@
 
 #include <vector>
 
-namespace RayTracer::Primitives::Flat
+namespace RayTracer::Primitives
 {
     /**
      * @class Plane
