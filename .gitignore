@@ -41,6 +41,7 @@ temporary/
 compile_commands.json
 *.log
 output.ppm
+/build
 
 # Doxygen
 docs/

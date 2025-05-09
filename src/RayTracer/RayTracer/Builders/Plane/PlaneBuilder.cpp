@@ -5,6 +5,7 @@
 ** PlaneBuilder
 */
 
+#include <iostream>
 #include "PlaneBuilder.hh"
 #include "RayTracer/Error/Error.hh"
 #include "RayTracer/Factories/Primitives/PrimitiveFactory.hh"
