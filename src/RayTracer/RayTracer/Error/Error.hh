@@ -12,6 +12,11 @@
 
 namespace RayTracer
 {
+    /**
+     * @class Error
+     *
+     * @brief Error class
+     */
     class Error : public std::exception {
         public:
             Error(std::string msg);
@@ -27,6 +32,11 @@ namespace RayTracer
     {
         namespace Builders
         {
+            /**
+             * @class InvalidTypeConversion
+             *
+             * @brief Invalid type conversion error
+             */
             class InvalidTypeConversion : public Error {
                 public:
                     InvalidTypeConversion(std::string msg);

@@ -14,11 +14,26 @@
 
 namespace RayTracer
 {
+    /**
+     * @class Core
+     *
+     * @brief Core class
+     */
     class Core {
         public:
+            /**
+             * @brief Default constructor for the Core object
+             */
             Core();
+
+            /**
+             * @brief Default destructor for the Core object
+             */
             ~Core() = default;
 
+            /**
+             * @brief Start the core
+             */
             void start(void);
 
         private:
