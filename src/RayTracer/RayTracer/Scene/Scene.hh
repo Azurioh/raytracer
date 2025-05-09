@@ -69,5 +69,8 @@ namespace RayTracer
             Color _getPrimitiveColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray, std::size_t depth = 0);
             Color _handleFlatColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray);
             Color _handleReflectColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray, std::size_t depth = 0);
+            void _scale();
+            std::vector<std::vector<Color>> _getAroundColor(int i, int j);
+            std::vector<Color> _getScaleColor(std::vector<std::vector<Color>> colors);
     };
 }

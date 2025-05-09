@@ -176,6 +176,7 @@ void RayTracer::Scene::makeRender(void)
             thread.join();
         }
     }
+    // _scale();
 }
 
 void RayTracer::Scene::exportToOutputFile(void)
@@ -418,4 +419,59 @@ Color RayTracer::Scene::_handleReflectColor(HitPrimitives hitPrimitives, std::si
         std::get<3>(color)
     };
     return newColor;
+}
+
+void RayTracer::Scene::_scale()
+{
+    std::vector<std::vector<Color>> newPixels;
+    std::vector<std::vector<Color>> tmpOutput;
+    std::vector<Color> tmp;
+
+    newPixels.resize(_pixels.size() * 2);
+    for (std::size_t i = 0; i < _pixels.size(); i++) {
+        for (std::size_t j = 0; j < _pixels[i].size(); j++) {
+            tmpOutput = _getAroundColor(j, i);
+            std::vector<Color> scalePixels = _getScaleColor(tmpOutput);
+            newPixels[i * 2].push_back(scalePixels[0]);
+            newPixels[i * 2].push_back(scalePixels[1]);
+            newPixels[(i * 2) + 1].push_back(scalePixels[2]);
+            newPixels[(i * 2) + 1].push_back(scalePixels[3]);
+        }
+    }
+    _pixels = newPixels;
+}
+
+std::vector<std::vector<Color>> RayTracer::Scene::_getAroundColor(int i, int j)
+{
+    std::vector<std::vector<Color>> output;
+
+    output.resize(3);
+    for (int x = -1; x < 2; x++) {
+        if (j + x < 0 || j + x >= static_cast<int>(_pixels.size())) {
+            output[x + 1] = {{0, 0, 0, 255}, {0, 0, 0, 255}, {0, 0, 0, 255}};
+            continue;
+        }
+        for (int y = -1; y < 2; y++) {
+            if (i + y < 0 || i + y >= static_cast<int>(_pixels[j + x].size())) {
+                output[x + 1].push_back({0, 0, 0, 255});
+            } else {
+                output[x + 1].push_back(_pixels[j + x][i + y]);
+            }
+        }
+    }
+    return output;
+}
+
+std::vector<Color> RayTracer::Scene::_getScaleColor(std::vector<std::vector<Color>> colors)
+{
+    if (colors[0][1] != colors[2][1] && colors[1][0] != colors[1][2]) {
+        return {
+            colors[1][0] == colors[0][1] ? colors[1][0] : colors[1][1],
+            colors[0][1] == colors[1][2] ? colors[1][2] : colors[1][1],
+            colors[1][0] == colors[2][1] ? colors[2][1] : colors[1][1],
+            colors[2][1] == colors[1][2] ? colors[1][2] : colors[1][1],
+        };
+    } else {
+        return {colors[1][1], colors[1][1], colors[1][1], colors[1][1]};
+    }
 }
