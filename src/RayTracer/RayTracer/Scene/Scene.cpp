@@ -176,7 +176,7 @@ void RayTracer::Scene::makeRender(void)
             thread.join();
         }
     }
-    // _scale();
+    // _scale4();
 }
 
 void RayTracer::Scene::exportToOutputFile(void)
@@ -421,7 +421,7 @@ Color RayTracer::Scene::_handleReflectColor(HitPrimitives hitPrimitives, std::si
     return newColor;
 }
 
-void RayTracer::Scene::_scale()
+void RayTracer::Scene::_scale2()
 {
     std::vector<std::vector<Color>> newPixels;
     std::vector<std::vector<Color>> tmpOutput;
@@ -431,14 +431,38 @@ void RayTracer::Scene::_scale()
     for (std::size_t i = 0; i < _pixels.size(); i++) {
         for (std::size_t j = 0; j < _pixels[i].size(); j++) {
             tmpOutput = _getAroundColor(j, i);
-            std::vector<Color> scalePixels = _getScaleColor(tmpOutput);
-            newPixels[i * 2].push_back(scalePixels[0]);
-            newPixels[i * 2].push_back(scalePixels[1]);
-            newPixels[(i * 2) + 1].push_back(scalePixels[2]);
-            newPixels[(i * 2) + 1].push_back(scalePixels[3]);
+            std::vector<Color> scalePixels = _getScale2Color(tmpOutput);
+            for (std::size_t x = 0; x < 4; x++) {
+                newPixels[(i * 2) + (x / 2)].push_back(scalePixels[x]);
+            }
         }
     }
     _pixels = newPixels;
+}
+
+void RayTracer::Scene::_scale3()
+{
+    std::vector<std::vector<Color>> newPixels;
+    std::vector<std::vector<Color>> tmpOutput;
+    std::vector<Color> tmp;
+
+    newPixels.resize(_pixels.size() * 3);
+    for (std::size_t i = 0; i < _pixels.size(); i++) {
+        for (std::size_t j = 0; j < _pixels[i].size(); j++) {
+            tmpOutput = _getAroundColor(j, i);
+            std::vector<Color> scalePixels = _getScale3Color(tmpOutput);
+            for (std::size_t x = 0; x < 9; x++) {
+                newPixels[(i * 3) + (x / 3)].push_back(scalePixels[x]);
+            }
+        }
+    }
+    _pixels = newPixels;
+}
+
+void RayTracer::Scene::_scale4()
+{
+    _scale2();
+    _scale2();
 }
 
 std::vector<std::vector<Color>> RayTracer::Scene::_getAroundColor(int i, int j)
@@ -462,16 +486,56 @@ std::vector<std::vector<Color>> RayTracer::Scene::_getAroundColor(int i, int j)
     return output;
 }
 
-std::vector<Color> RayTracer::Scene::_getScaleColor(std::vector<std::vector<Color>> colors)
+std::vector<Color> RayTracer::Scene::_getScale2Color(std::vector<std::vector<Color>> colors)
 {
-    if (colors[0][1] != colors[2][1] && colors[1][0] != colors[1][2]) {
+    Color B = colors[0][1];
+    Color D = colors[1][0];
+    Color E = colors[1][1];
+    Color F = colors[1][2];
+    Color H = colors[2][1];
+
+    if (B != H && D != F) {
         return {
-            colors[1][0] == colors[0][1] ? colors[1][0] : colors[1][1],
-            colors[0][1] == colors[1][2] ? colors[1][2] : colors[1][1],
-            colors[1][0] == colors[2][1] ? colors[2][1] : colors[1][1],
-            colors[2][1] == colors[1][2] ? colors[1][2] : colors[1][1],
+            D == B ? D : E,
+            B == F ? F : E,
+            D == H ? D : E,
+            H == F ? F : E,
         };
     } else {
-        return {colors[1][1], colors[1][1], colors[1][1], colors[1][1]};
+        return {
+            E,
+            E,
+            E,
+            E,
+        };
+    }
+}
+
+std::vector<Color> RayTracer::Scene::_getScale3Color(std::vector<std::vector<Color>> colors)
+{
+    Color A = colors[0][0];
+    Color B = colors[0][1];
+    Color C = colors[0][2];
+    Color D = colors[1][0];
+    Color E = colors[1][1];
+    Color F = colors[1][2];
+    Color G = colors[2][0];
+    Color H = colors[2][1];
+    Color I = colors[2][2];
+
+    if (B != H && D != F) {
+        return {
+            D == B ? D : E,
+            (D == B && E != C) || (B == F && E != A) ? B : E,
+            B == F ? F : E,
+            (D == B && E != G) || (D == H && E != A) ? D : E,
+            E,
+            (B == F && E != I) || (H == F && E != C) ? F : E,
+            D == H ? D : E,
+            (D == H && E != I) || (H == F && E != G) ? H : E,
+            H == F ? F : E,
+        };
+    } else {
+        return {E, E, E, E, E, E, E, E, E};
     }
 }
