@@ -26,6 +26,7 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
         {false, 0.0},
         {false, 0.0},
         Math::Vector3D(0, 0, 0),
+        1,
         100.0
     );
     _primitives.push_back(std::move(sphereBuilder.getPrimitive()));
@@ -35,6 +36,7 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
         {false, 0.0},
         {false, 0.0},
         Math::Vector3D(0, 0, 0),
+        1,
         50.0
     );
     _primitives.push_back(std::move(sphereBuilder.getPrimitive()));
@@ -44,6 +46,7 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
         {false, 0.0},
         {false, 0.0},
         Math::Vector3D(0, 0, 0),
+        1,
         50.0
     );
     _primitives.push_back(std::move(sphereBuilder.getPrimitive()));
@@ -53,7 +56,10 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
         {true, 0.5},
         {false, 0.0},
         Math::Vector3D(0, 0, 0),
-        Math::Vector3D(0, -1, 0)
+        3,
+        0.0,
+        -1.0,
+        0.0
     );
     _primitives.push_back(std::move(planeBuilder.getPrimitive()));
 
@@ -68,6 +74,7 @@ RayTracer::Scene::Scene(): _camera(std::make_unique<RayTracer::Camera>()), _ambi
     _primitives[3]->setColor({240, 240, 240, 255});
     _primitives[3]->setHavingReflection(true);
     _primitives[3]->setReflectionIntensity(0.5);
+    std::cout << "TEST: " << _primitives[3]->isHavingReflection() << std::endl;
 
     makeRender();
 }

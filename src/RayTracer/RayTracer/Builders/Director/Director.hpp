@@ -38,12 +38,12 @@ namespace RayTracer::Builders
              * @param ... The arguments to build the primitive size
              */
             void makePrimitive(IPrimitiveBuilder<T>& builder, Math::Point3D const& center, Color color,
-                std::pair<bool, double> reflection, std::pair<bool, double> refraction, Math::Vector3D const& rotation, ...)
+                std::pair<bool, double> reflection, std::pair<bool, double> refraction, Math::Vector3D const& rotation, int n = 0, ...)
             {
                 std::va_list args;
 
                 builder.reset();
-                va_start(args, rotation);
+                va_start(args, n);
                 builder.buildCenter(center);
                 builder.buildColor(color);
                 if (reflection.first) {
