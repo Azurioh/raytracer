@@ -176,7 +176,7 @@ void RayTracer::Scene::makeRender(void)
             thread.join();
         }
     }
-    // _scale4();
+    // _scale(X4);
 }
 
 void RayTracer::Scene::exportToOutputFile(void)
@@ -421,48 +421,29 @@ Color RayTracer::Scene::_handleReflectColor(HitPrimitives hitPrimitives, std::si
     return newColor;
 }
 
-void RayTracer::Scene::_scale2()
+void RayTracer::Scene::_scale(RayTracer::Scene::ScaleFactor factor)
 {
     std::vector<std::vector<Color>> newPixels;
     std::vector<std::vector<Color>> tmpOutput;
     std::vector<Color> tmp;
+    std::size_t newSize = factor == X2 ? 2 : 3;
 
-    newPixels.resize(_pixels.size() * 2);
+    if (factor == X4) {
+        _scale(X2);
+        _scale(X2);
+        return;
+    }
+    newPixels.resize(_pixels.size() * newSize);
     for (std::size_t i = 0; i < _pixels.size(); i++) {
         for (std::size_t j = 0; j < _pixels[i].size(); j++) {
             tmpOutput = _getAroundColor(j, i);
-            std::vector<Color> scalePixels = _getScale2Color(tmpOutput);
-            for (std::size_t x = 0; x < 4; x++) {
-                newPixels[(i * 2) + (x / 2)].push_back(scalePixels[x]);
+            std::vector<Color> scalePixels = factor == X2 ? _getScale2Color(tmpOutput) : _getScale3Color(tmpOutput);
+            for (std::size_t x = 0; x < newSize * newSize; x++) {
+                newPixels[(i * newSize) + (x / newSize)].push_back(scalePixels[x]);
             }
         }
     }
     _pixels = newPixels;
-}
-
-void RayTracer::Scene::_scale3()
-{
-    std::vector<std::vector<Color>> newPixels;
-    std::vector<std::vector<Color>> tmpOutput;
-    std::vector<Color> tmp;
-
-    newPixels.resize(_pixels.size() * 3);
-    for (std::size_t i = 0; i < _pixels.size(); i++) {
-        for (std::size_t j = 0; j < _pixels[i].size(); j++) {
-            tmpOutput = _getAroundColor(j, i);
-            std::vector<Color> scalePixels = _getScale3Color(tmpOutput);
-            for (std::size_t x = 0; x < 9; x++) {
-                newPixels[(i * 3) + (x / 3)].push_back(scalePixels[x]);
-            }
-        }
-    }
-    _pixels = newPixels;
-}
-
-void RayTracer::Scene::_scale4()
-{
-    _scale2();
-    _scale2();
 }
 
 std::vector<std::vector<Color>> RayTracer::Scene::_getAroundColor(int i, int j)

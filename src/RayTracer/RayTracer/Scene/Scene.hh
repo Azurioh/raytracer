@@ -42,6 +42,12 @@ namespace RayTracer
                 RIGHT_ANGLE,
             };
 
+            enum ScaleFactor {
+                X2,
+                X3,
+                X4,
+            };
+
             std::vector<std::vector<Color>> getPixels(void) const;
 
             void setPixels(std::vector<std::vector<Color>> pixels);
@@ -69,9 +75,7 @@ namespace RayTracer
             Color _getPrimitiveColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray, std::size_t depth = 0);
             Color _handleFlatColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray);
             Color _handleReflectColor(HitPrimitives hitPrimitives, std::size_t index, RayTracer::Ray ray, std::size_t depth = 0);
-            void _scale2();
-            void _scale3();
-            void _scale4();
+            void _scale(ScaleFactor factor);
             std::vector<std::vector<Color>> _getAroundColor(int i, int j);
             std::vector<Color> _getScale2Color(std::vector<std::vector<Color>> colors);
             std::vector<Color> _getScale3Color(std::vector<std::vector<Color>> colors);
