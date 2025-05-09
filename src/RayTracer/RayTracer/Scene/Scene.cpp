@@ -176,6 +176,7 @@ void RayTracer::Scene::makeRender(void)
             thread.join();
         }
     }
+    // _scale(X4);
 }
 
 void RayTracer::Scene::exportToOutputFile(void)
@@ -418,4 +419,104 @@ Color RayTracer::Scene::_handleReflectColor(HitPrimitives hitPrimitives, std::si
         std::get<3>(color)
     };
     return newColor;
+}
+
+void RayTracer::Scene::_scale(RayTracer::Scene::ScaleFactor factor)
+{
+    std::vector<std::vector<Color>> newPixels;
+    std::vector<std::vector<Color>> tmpOutput;
+    std::vector<Color> tmp;
+    std::size_t newSize = factor == X2 ? 2 : 3;
+
+    if (factor == X4) {
+        _scale(X2);
+        _scale(X2);
+        return;
+    }
+    newPixels.resize(_pixels.size() * newSize);
+    for (std::size_t i = 0; i < _pixels.size(); i++) {
+        for (std::size_t j = 0; j < _pixels[i].size(); j++) {
+            tmpOutput = _getAroundColor(j, i);
+            std::vector<Color> scalePixels = factor == X2 ? _getScale2Color(tmpOutput) : _getScale3Color(tmpOutput);
+            for (std::size_t x = 0; x < newSize * newSize; x++) {
+                newPixels[(i * newSize) + (x / newSize)].push_back(scalePixels[x]);
+            }
+        }
+    }
+    _pixels = newPixels;
+}
+
+std::vector<std::vector<Color>> RayTracer::Scene::_getAroundColor(int i, int j)
+{
+    std::vector<std::vector<Color>> output;
+
+    output.resize(3);
+    for (int x = -1; x < 2; x++) {
+        if (j + x < 0 || j + x >= static_cast<int>(_pixels.size())) {
+            output[x + 1] = {{0, 0, 0, 255}, {0, 0, 0, 255}, {0, 0, 0, 255}};
+            continue;
+        }
+        for (int y = -1; y < 2; y++) {
+            if (i + y < 0 || i + y >= static_cast<int>(_pixels[j + x].size())) {
+                output[x + 1].push_back({0, 0, 0, 255});
+            } else {
+                output[x + 1].push_back(_pixels[j + x][i + y]);
+            }
+        }
+    }
+    return output;
+}
+
+std::vector<Color> RayTracer::Scene::_getScale2Color(std::vector<std::vector<Color>> colors)
+{
+    Color B = colors[0][1];
+    Color D = colors[1][0];
+    Color E = colors[1][1];
+    Color F = colors[1][2];
+    Color H = colors[2][1];
+
+    if (B != H && D != F) {
+        return {
+            D == B ? D : E,
+            B == F ? F : E,
+            D == H ? D : E,
+            H == F ? F : E,
+        };
+    } else {
+        return {
+            E,
+            E,
+            E,
+            E,
+        };
+    }
+}
+
+std::vector<Color> RayTracer::Scene::_getScale3Color(std::vector<std::vector<Color>> colors)
+{
+    Color A = colors[0][0];
+    Color B = colors[0][1];
+    Color C = colors[0][2];
+    Color D = colors[1][0];
+    Color E = colors[1][1];
+    Color F = colors[1][2];
+    Color G = colors[2][0];
+    Color H = colors[2][1];
+    Color I = colors[2][2];
+
+    if (B != H && D != F) {
+        return {
+            D == B ? D : E,
+            (D == B && E != C) || (B == F && E != A) ? B : E,
+            B == F ? F : E,
+            (D == B && E != G) || (D == H && E != A) ? D : E,
+            E,
+            (B == F && E != I) || (H == F && E != C) ? F : E,
+            D == H ? D : E,
+            (D == H && E != I) || (H == F && E != G) ? H : E,
+            H == F ? F : E,
+        };
+    } else {
+        return {E, E, E, E, E, E, E, E, E};
+    }
 }
